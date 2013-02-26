@@ -2,7 +2,7 @@ CC=mpicc
 SOURCE=test.c actor/actor.c
 TARGET=test
 OBJECT=$(SOURCE:.c=.o)
-CFLAGS=
+CFLAGS=-Wall
 
 all: $(TARGET)
 

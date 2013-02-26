@@ -7,7 +7,7 @@
 #ifndef __PDP_ACTOR_H__
 #define __PDP_ACTOR_H__
 
-struct Actor_s{
+struct Actor_s {
   int unique_id;
   int mpi_rank;
   int mpi_size;
@@ -19,11 +19,10 @@ struct Actor_s{
 };
 typedef struct Actor_s Actor;
 
+Actor* initActor();
 void actor_kill(struct Actor_s this);
 
 void actors_init();
 void actors_finalize();
 
-void message_actor(Actor them, int message);
-void spawn_child_actor(Actor);
 #endif

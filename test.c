@@ -7,7 +7,7 @@ void act_start();
 void act_stop();
 
 typedef struct {
-  Actor actor;
+  Actor *actor;
   int val_one;
   int val_two;
 } New_actor;
@@ -15,16 +15,17 @@ typedef struct {
 int main()
 {
   actors_init();
-  New_actor *new_actor = initActor();
+  New_actor new_actor;
+  new_actor.actor = initActor();
 
-  new_actor->actor.init = act_init;
-  new_actor->actor.start = act_start;
-  new_actor->actor.stop = act_stop;
+  new_actor.actor->init = act_init;
+  new_actor.actor->start = act_start;
+  new_actor.actor->stop = act_stop;
 
-  new_actor->actor.init();
-  new_actor->actor.start();
-  new_actor->actor.stop();
-  new_actor->actor.kill(this);
+  new_actor.actor->init();
+  new_actor.actor->start();
+  new_actor.actor->stop();
+  new_actor.actor->kill(tis);
   actors_finalize();
   
   return 0;

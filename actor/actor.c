@@ -24,5 +24,5 @@ Actor* initActor()
   MPI_Comm_rank(MPI_COMM_WORLD, &(actor->mpi_rank));
   MPI_Comm_size(MPI_COMM_WORLD, &(actor->mpi_size));
   actor->kill_now = 0;
-  actor->kill = actor_kill;
+  return actor;
 }
