@@ -1,5 +1,5 @@
-CC=gcc
-SOURCE=test.c
+CC=mpicc
+SOURCE=test.cpp
 TARGET=test
 OBJECT=$(SOURCE:.c=.o)
 CFLAGS=

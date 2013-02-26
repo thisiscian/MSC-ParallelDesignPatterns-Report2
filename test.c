@@ -1,4 +1,5 @@
-#include <stdio.h>
+#include <mpi.h>
+#include <iostream>
 #include "actor/actor.h"
 
 void act_init();
@@ -10,13 +11,14 @@ typedef struct {
   int currentHop;
 } Frog;
 
+using namespace std;
+
 int main()
 {
   Actor actor;
   Frog frog = {0,0};
 
   actor.my_var = &frog;
-  actor.my_struct = Frog*;
 
   printf("%d\n", ((Frog*) actor.my_var)->currentHop);
 
@@ -33,13 +35,13 @@ int main()
 
 void act_init()
 {
-  printf("Init\n");
+  cout << "init" << endl;
 }
 void act_start()
 {
-  printf("Start\n");
+  cout << "start" << endl;
 }
 void act_stop()
 {
-  printf("Stop\n");
+  cout << "stop" << endl;
 }
