@@ -12,6 +12,12 @@ typedef struct {
   void (*init)();
   void (*start)();
   void (*stop)();
-} actor;
+  void (*kill)();
 
+  void *my_var;
+  void *my_struct;
+} Actor;
+
+void message_actor(Actor them, int message);
+void spawn_child_actor(Actor);
 #endif

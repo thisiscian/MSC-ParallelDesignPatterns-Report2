@@ -1,6 +1,6 @@
 CC=gcc
-SOURCE=main.c
-TARGET=main
+SOURCE=test.c
+TARGET=test
 OBJECT=$(SOURCE:.c=.o)
 CFLAGS=
 
