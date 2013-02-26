@@ -1,5 +1,5 @@
 #include <mpi.h>
-#include <iostream>
+#include <stdio.h>
 #include "actor/actor.h"
 
 void act_init();
@@ -7,41 +7,38 @@ void act_start();
 void act_stop();
 
 typedef struct {
-  int infectionValue;
-  int currentHop;
-} Frog;
-
-using namespace std;
+  Actor actor;
+  int val_one;
+  int val_two;
+} New_actor;
 
 int main()
 {
-  Actor actor;
-  Frog frog = {0,0};
+  actors_init();
+  New_actor *new_actor = initActor();
 
-  actor.my_var = &frog;
+  new_actor->actor.init = act_init;
+  new_actor->actor.start = act_start;
+  new_actor->actor.stop = act_stop;
 
-  printf("%d\n", ((Frog*) actor.my_var)->currentHop);
-
-  actor.init = act_init;
-  actor.start = act_start;
-  actor.stop = act_stop;
-
-  actor.init();
-  actor.start();
-  actor.stop();
+  new_actor->actor.init();
+  new_actor->actor.start();
+  new_actor->actor.stop();
+  new_actor->actor.kill(this);
+  actors_finalize();
   
   return 0;
 }
 
 void act_init()
 {
-  cout << "init" << endl;
+  printf("init\n");
 }
 void act_start()
 {
-  cout << "start" << endl;
+  printf("start\n");
 }
 void act_stop()
 {
-  cout << "stop" << endl;
+  printf("stop\n");
 }

@@ -1,5 +1,5 @@
 CC=mpicc
-SOURCE=test.cpp
+SOURCE=test.c actor/actor.c
 TARGET=test
 OBJECT=$(SOURCE:.c=.o)
 CFLAGS=
