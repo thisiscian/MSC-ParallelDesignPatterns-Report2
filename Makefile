@@ -2,15 +2,15 @@ CC=gcc
 SOURCE=main.c
 TARGET=main
 OBJECT=$(SOURCE:.c=.o)
-LIBRARY=actor/actor.c
 CFLAGS=
 
 all: $(TARGET)
 
-$(TARGET): $(OBJECT) $(LIBRARY)
-	$(CC) $(CFLAGS) -o $@ $(SOURCE) $(LIBRARY) -lm
+$(TARGET): $(OBJECT)
+	$(CC) $(CFLAGS) -o $@ $(OBJECT)
 
 clean: 
 	@rm -f $(TARGET) $(OBJECT)
 
 $(OBJECT): Makefile 
+

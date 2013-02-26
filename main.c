@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "actor/actor.c"
+#include "actor/actor.h"
 
 void act_init();
 void act_start();
