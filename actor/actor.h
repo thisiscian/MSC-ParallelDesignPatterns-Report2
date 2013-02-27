@@ -1,28 +1,26 @@
 /*
- *    Define a new struct
- *    called Actor
+ *    Define a new struct called 'Actor'; contains MPI information and function pointers to tell it what to run
  *
  */
 
 #ifndef __PDP_ACTOR_H__
 #define __PDP_ACTOR_H__
 
-struct Actor_s {
+typedef struct {
   int unique_id;
   int mpi_rank;
   int mpi_size;
-  int kill_now;
-  void (*init)();
+  int kill;
   void (*start)();
   void (*stop)();
-  void (*kill)(struct Actor_s this);
-};
-typedef struct Actor_s Actor;
+} Actor;
 
 Actor* initActor();
-void actor_kill(struct Actor_s this);
+void actor_kill(Actor *actor);
 
 void actors_init();
 void actors_finalize();
+
+void spawnActor();
 
 #endif
