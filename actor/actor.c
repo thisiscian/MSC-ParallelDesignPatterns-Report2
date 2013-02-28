@@ -22,11 +22,16 @@ void actor_start(Actor *actor)
 
 }
 
+Director* initDirector() {
+  Director* director = (Director*) malloc(sizeof(Director));
+  director.actor = initActor();
+  MPI_Comm_rank(MPI_COMM_WORLD, &(director->mpi_rank));
+  MPI_Comm_size(MPI_COMM_WORLD, &(director->mpi_size));
+}
+
 Actor* initActor()
 {
   Actor *actor = (Actor*) malloc(sizeof(Actor));
-  MPI_Comm_rank(MPI_COMM_WORLD, &(actor->mpi_rank));
-  MPI_Comm_size(MPI_COMM_WORLD, &(actor->mpi_size));
   actor->kill = 0;
   return actor;
 }

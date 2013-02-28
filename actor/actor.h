@@ -8,19 +8,23 @@
 
 typedef struct {
   int unique_id;
-  int mpi_rank;
-  int mpi_size;
   int kill;
   void (*start)();
   void (*stop)();
 } Actor;
 
-Actor* initActor();
-void actor_kill(Actor *actor);
+typedef struct {
+  Actor *actor;
+  int mpi_rank;
+  int mpi_size;
+} Director;
 
 void actors_init();
-void actors_finalize();
+Actor* initActor();
+Director* initDirector();
 
+void actor_kill(Actor *actor);
+void actors_finalize();
 void spawnActor();
 
 #endif
