@@ -1,46 +1,41 @@
 #ifndef __PDP_ACTOR_H__
 #define __PDP_ACTOR_H__
 
+typedef struct Actor_List_s Actor_List_s;
+
 struct Actor_s{
   int id;             // unique id by which a variable can be identified
+  int mpi_rank;
+  int mpi_size;
   int kill;           // flag to kill 
+  int stop;
   void (*rehearse)(); // initialisation function pointer
   void (*script)(struct Actor_s* actor);   // main loop function pointer
   void (*retire)();   // kill actor
   void *props;        // variables the actor owns
+  struct Actor_List_s *child_list;
+  struct Actor_List_s *list_beginning;
 };
 typedef struct Actor_s Actor;
 
 struct Actor_List_s{
   Actor* actor;
-  void (*script)(Actor* actor);
   struct Actor_List_s *next;
 };
 typedef struct Actor_List_s Actor_List;
 
-typedef struct {
-  Actor *actor;
-  int mpi_rank;
-  int mpi_size;
-  int total_actor_count;
-  int current_actor_count;
-  int stop;
-  Actor_List *actor_list ;
-} Director;
-
-
-Director* initialise_model();
+Actor* initialise_model();
 void finalise_model();
 
-void director_direct_iteration(Director *director);
-void director_start_show(Director *director);
+void actor_run_child_iteration(Actor *actor);
+void start(Actor *actor);
 
 Actor* initialise_actor(int internal_id, void (*script)(), void* data);
-Director* initialise_director(int mpi_rank, int mpi_size);
-Actor_List* actor_list_new_link(Actor *);
+Actor_List* new_actor_list(Actor *new_actor);
+Actor_List* actor_list_new_link(Actor *new_actor, Actor_List *new_list);
 void actor_kill(Actor *actor);
 void actor_spawn_on_director(int director_id);
-void actor_spawn(Director* director, void (*script)(Actor* actor), void* data);
-void director_tasks();
+void actor_spawn(Actor* actor, void (*script)(Actor* actor), void* data);
+void default_task();
 
 #endif

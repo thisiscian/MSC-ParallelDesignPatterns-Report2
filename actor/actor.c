@@ -3,83 +3,90 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-Director* initialise_model()
+int next_id = 1;
+
+Actor* initialise_model()
 {
   int mpi_rank, mpi_size;
   MPI_Init(NULL,NULL);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-  Director *director = initialise_director(mpi_rank, mpi_size);
-  director->actor->id = mpi_rank;
-  return director;
+  Actor *actor = initialise_actor(mpi_rank, default_task, 0);
+  return actor;
 }
 
 void finalise_model(){
   MPI_Finalize();
 }
 
-void director_start_show(Director *director)
+void start(Actor *actor)
 {
-  while(!director->stop)
+  //printf("Actor(%d) starting\n", actor->id);
+  do
   {
-    director_direct_iteration(director);
+    actor->script(actor);
+    actor_run_child_iteration(actor);
   }
+  while(!actor->stop && actor->id < actor->mpi_size);
 }
 
-void director_direct_iteration(Director *director)
+void actor_run_child_iteration(Actor *actor)
 {
-  director->actor_list->script(director->actor_list->actor);
-  director->actor_list = director->actor_list->next;
+  //printf("Actor(%d) checking for children...\n", actor->id);
+  while(actor->child_list != NULL)
+  {
+    //printf("Actor(%d) found child; telling Actor(%d) to start\n", actor->id, actor->child_list->actor->id);
+    start(actor->child_list->actor);
+    actor->child_list = actor->child_list->next;
+  }
+  
+  actor->child_list = actor->list_beginning;
 }
 
-Director* initialise_director(int rank, int size)
-{
-  Director* director = (Director*) malloc(sizeof(Director));
-  director->actor_list = (Actor_List*) malloc(sizeof(Actor_List));
-
-  director->actor = initialise_actor(rank, director_tasks, 0);
-  director->actor_list = actor_list_new_link(director->actor);
-  director->actor_list->next = director->actor_list;
-  director->total_actor_count = 0;
-  director->current_actor_count = 0;
-
-  director->mpi_rank = rank;
-  director->mpi_size = size;
-  director->stop = 0;
-
-  return director;
-}
-
-Actor* initialise_actor(int internal_id, void (*new_script)(Actor* actor), void* data)
+Actor* initialise_actor(int new_id, void (*new_script)(Actor* actor), void* data)
 {
   Actor *actor = (Actor*) malloc(sizeof(Actor));
+  actor->id = new_id;
+  MPI_Comm_rank(MPI_COMM_WORLD, &(actor->mpi_rank));
+  MPI_Comm_size(MPI_COMM_WORLD, &(actor->mpi_size));
   actor->kill = 0;
+  actor->stop = 0;
   actor->script = new_script;
-  actor->id = internal_id;
   actor->props = data;
+  actor->child_list = NULL;
   return actor;
 }
 
-Actor_List* actor_list_new_link(Actor* new_actor)
+Actor_List* new_actor_list(Actor* new_actor)
 {
-  Actor_List* actor_list = (Actor_List*) malloc(sizeof(Actor_List));
+  Actor_List* actor_list;
+  if(!(actor_list = malloc(sizeof(Actor_List)))) return NULL;
+  actor_list->next=NULL;
   actor_list->actor = new_actor;
-  actor_list->script = new_actor->script;
   return actor_list;
 }
 
-void actor_spawn(Director* director, void(*script)(Actor* actor), void* data)
+Actor_List* actor_list_new_link(Actor* new_actor, Actor_List* new_list)
 {
-  director->total_actor_count++; 
-  director->current_actor_count++;
-      printf("Director(%d): spawning actor(%d)\n", director->actor->id, director->mpi_rank+director->mpi_size*director->total_actor_count);
-  Actor *actor = initialise_actor(director->mpi_rank+director->mpi_size*director->total_actor_count, script, data);
-
-  // Link the actor_list cyclically, and insert new nodes into the next element
-  Actor_List* tmp_list = director->actor_list->next;
-  director->actor_list->next = actor_list_new_link(actor);
-  director->actor_list->next->next = tmp_list;
-  printf("Director(%d): linked list of actors created\n", director->actor->id);
+  Actor_List* actor_list = new_actor_list(new_actor);
+  actor_list->next = new_list;
+  return actor_list;
 }
 
-void director_tasks(Actor* actor, void* data) {}
+void actor_spawn(Actor* parent, void(*script)(Actor* actor), void* data)
+{
+  Actor *actor = initialise_actor(parent->mpi_rank+next_id*parent->mpi_size, script, data);
+  next_id++;
+  printf("Actor(%d) spawning actor(%d)\n", parent->id, actor->id);
+  if(parent->child_list != NULL)
+  {
+    parent->child_list->next = actor_list_new_link(actor, parent->child_list->next);
+  }
+  else 
+  {
+    parent->child_list = actor_list_new_link(actor,NULL);
+    parent->list_beginning = parent->child_list;
+  }
+}
+
+void default_task(Actor* actor, void* data) {}
