@@ -12,5 +12,8 @@ $(TARGET): $(OBJECT)
 clean: 
 	@rm -f $(TARGET) $(OBJECT)
 
+run: $(TARGET)
+	mpiexec -n 2 ./$(TARGET)
+
 $(OBJECT): Makefile 
 

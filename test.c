@@ -2,37 +2,32 @@
 #include <stdio.h>
 #include "actor/actor.h"
 
-void act_start();
-void act_stop();
+void act_start(Actor* actor);
+void act_stop(Actor* actor);
 
 typedef struct {
-  Actor *actor;
-  int val_one;
-  int val_two;
-} New_actor;
+  int one;
+  double two;
+} my_prop;
 
 int main()
 {
-  actors_init();
-  New_actor new_actor;
-  new_actor.actor = initActor();
 
-  new_actor.actor->start = act_start;
-  new_actor.actor->stop = act_stop;
-
-  new_actor.actor->start();
-  new_actor.actor->stop();
-  actors_finalize();
-  
+  Director *director = initialise_model();
+  director->actor->script = act_start;
+  my_prop actor_data = {1, 2.0};
+  actor_spawn(director, act_start, actor_data);
+  director_start_show(director); 
+  finalise_model();
   return 0;
 }
 
-void act_start(New_actor *new_actor)
+void act_start(Actor* actor)
 {
-  new_actor.actor->start();
+  printf("Actor(%d): reading from script\n", actor->id);
 }
 
-void act_stop()
+void act_stop(Actor* actor)
 {
-  printf("stop\n");
+  printf("Actor(%d): stopping now\n", actor->id);
 }
