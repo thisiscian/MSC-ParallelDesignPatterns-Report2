@@ -7,6 +7,7 @@
 #include <mpi.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 // global variable currently needed for unique ID of actors
 int next_id = 1;
@@ -72,7 +73,7 @@ int read_script(Actor *actor)
   int lines_read = 0;
   do
   {
-    if(actor->id < actor->mpi_size)
+    if(actor->mentor == NULL)
     {
       lines_read = 0;
     }
@@ -181,4 +182,46 @@ void no_rehearse(Actor* actor) {}
 void no_script(Actor* actor)
 {
   actor->retire = 1;
+}
+
+void read_line(Actor* me, int you, int message_type, int next_message_size)
+{
+  int destination_rank = you%me->mpi_size;
+  int message[2] = {message_type, next_message_size}; 
+  MPI_Request request;
+  MPI_Isend(message, 2, MPI_INT, destination_rank, you, MPI_COMM_WORLD, &request);
+}
+
+void react_to_line(Actor* actor, void (*reaction)(Actor* actor, int message_type, int next_message_size))
+{
+  int message[2];
+  int received;
+  MPI_Request request;
+  MPI_Status status;
+  MPI_Irecv(&message, 2, MPI_INT, MPI_ANY_SOURCE, actor->id, MPI_COMM_WORLD, &request);
+  MPI_Request_get_status(request, &received, &status);
+  if(received)
+  {
+    reaction(actor, message[0], message[1]);
+  }
+}
+
+void give_props(Actor* me, int you, int prop_count, MPI_Datatype datatype, void* prop)
+{
+  int destination_rank = you%me->mpi_size;
+  MPI_Request request;
+  MPI_Isend(prop, prop_count, MPI_INT, destination_rank, you, MPI_COMM_WORLD, &request);
+}
+
+void get_props(Actor* actor, int prop_count, MPI_Datatype datatype, void* prop)
+{
+  int received;
+  MPI_Request request;
+  MPI_Status status;
+  MPI_Irecv(prop, prop_count, MPI_INT, MPI_ANY_SOURCE, actor->id, MPI_COMM_WORLD, &request);
+  MPI_Request_get_status(request, &received, &status);
+  if(received)
+  {
+    printf("I have received\n");
+  }
 }

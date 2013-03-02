@@ -1,6 +1,8 @@
 #ifndef __PDP_ACTOR_H__
 #define __PDP_ACTOR_H__
 
+#include <mpi.h>
+
 typedef struct Protege_s Protege_s;
 typedef struct Protege_s Protege;
 typedef struct Actor_s Actor;
@@ -13,6 +15,7 @@ struct Actor_s{
   void (*rehearse)(); // custom function that runs before the actor starts
   void (*script)();   // custom function that actor runs every iteration
   void *props;        // variables the actor owns
+  void *message_bay;  // where messages come in
   struct Actor_s *mentor; //parent of actor
   struct Protege_s *proteges; // linked list containing children of actor
   struct Protege_s *first_protege; // copy of first element of list
@@ -59,9 +62,15 @@ void _retire_actor(Actor* actor);
 int read_script(Actor *actor);
 int _help_understudies(Actor *actor);
 
+// Functions that allow the sending and recieving of messages and props
+void read_line(Actor* me, int you, int message_type, int next_message_size);
+void react_to_line(Actor* actor, void (*reaction)(Actor* actor, int message_type, int next_message_size));
+void give_props(Actor* me, int you, int prop_count, MPI_Datatype datatype, void* prop);
+void get_props(Actor*me, int prop_count, MPI_Datatype datatype, void* prop);
+
 // Default rehearsal and scripts
-void no_script();
-void no_rehearse();
+void no_script(Actor* actor);
+void no_rehearse(Actor* actor);
 void exit_stage(Actor* actor);
 
 #endif
