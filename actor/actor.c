@@ -2,7 +2,6 @@
 // Each MPI process spawns at least one actor
 // However, each MPI process can have any amount of actors, by having the
 // initial actor spawn more
-//
 
 #include "actor.h"
 #include <mpi.h>
@@ -14,19 +13,52 @@ int next_id = 1;
 
 // Actor* INITIALISE_MODEL
 // Initialise MPI and create one actor per process, who's id is the rank of the
-// host process.
-Actor* initialise_model()
+// host process. The input variables are functions which returns function
+// pointers; this means that you can functionally choose which script each 
+// actor reads from, when you start the model.
+Actor* initialise_actor_model
+(
+  void (*choose_rehearse_function(int id))(Actor *actor),
+  void (*choose_script_function(int id))(Actor* actor),
+  int (*choose_amount_of_memory_to_allocate)(int id)
+)
 {
   int mpi_rank;
+  void (*rehearse_function)(Actor *actor);
+  void (*script_function)(Actor *actor);
+  int amount_of_memory_to_allocate = 0;
   MPI_Init(NULL,NULL);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  Actor *actor = _train_actor(mpi_rank, no_rehearsal, no_script, 0);
-  return actor;
+  if(choose_rehearse_function == NULL)
+  {
+    rehearse_function = no_rehearse;
+  }
+  else
+  {
+    rehearse_function = choose_rehearse_function(mpi_rank);
+  }
+  if(choose_script_function == NULL)
+  {
+    script_function = no_script;
+  }
+  else
+  {
+    script_function = choose_script_function(mpi_rank);
+  }
+  if(choose_amount_of_memory_to_allocate == NULL)
+  {
+    amount_of_memory_to_allocate = 0;
+  }
+  else
+  {
+    amount_of_memory_to_allocate = choose_amount_of_memory_to_allocate(mpi_rank);
+  }
+  return _train_actor(NULL, mpi_rank, rehearse_function, script_function, amount_of_memory_to_allocate);
 }
 
 // void FINALISE_MODEL
 // finalise MPI and the actor model
-void finalise_model(){
+void finalise_actor_model(){
   MPI_Finalize();
 }
 
@@ -34,38 +66,46 @@ void finalise_model(){
 // Starts a particular actor doing their normal work. This consists of reading
 // their 'script' and then starting any children it may have. Special case for
 // the first actors on an mpi process; they keep running until they are told
-// to stop_f. Other actors only run their start process once .
-void read_script(Actor *actor)
+// to stop. Other actors only run their start process once .
+int read_script(Actor *actor)
 {
-  printf("Actor(%d) reading script\n", actor->id);
+  int lines_read = 0;
   do
   {
-    actor->script(actor);
-    _help_understudies(actor);
+    if(actor->id < actor->mpi_size)
+    {
+      lines_read = 0;
+    }
+    if(!actor->retire)
+    {
+      actor->script(actor);
+      lines_read++;
+    }
+    lines_read += _help_understudies(actor);
   }
-  while(!actor->stop && actor->id < actor->mpi_size);
+  while(lines_read > 0 && actor->mentor == NULL);
+  return lines_read;
 }
 
 // void ACTOR_RUN_CHILD_ITERATION
 // runs through each child of an actor and tells it to start
-void _help_understudies(Actor *actor)
+int _help_understudies(Actor *actor)
 {
-  while(actor->child_list != NULL)
+  int lines_read = 0;
+  while(actor->proteges != NULL)
   {
-    if(actor->child_list->actor->stop)
-    {
-      _remove_from_list(actor);
-    }
-    read_script(actor->child_list->actor);
-    actor->child_list = actor->child_list->next;
+    lines_read += read_script(actor->proteges->actor);
+    actor->proteges = actor->proteges->next;
   }
-  actor->child_list = actor->list_beginning;
+  actor->proteges = actor->first_protege;
+  return lines_read;
 }
 
 // void INITIALISE_ACTOR
 // initialise an actor with no children, and a given id, script and prop set
 Actor* _train_actor
 (
+  Actor* new_mentor,
   int new_id,
   void (*new_rehearse)(Actor* actor),
   void (*new_script)(Actor* actor),
@@ -76,81 +116,69 @@ Actor* _train_actor
   actor->id = new_id;
   MPI_Comm_rank(MPI_COMM_WORLD, &(actor->mpi_rank));
   MPI_Comm_size(MPI_COMM_WORLD, &(actor->mpi_size));
-  actor->stop = 0;
+  actor->retire = 0;
   actor->script = new_script;
   actor->rehearse = new_rehearse;
   actor->props = malloc(mem_size);
-  actor->child_list = NULL;
-  actor->list_beginning = NULL;
+  actor->proteges = NULL;
+  actor->mentor = new_mentor;
+  actor->first_protege = NULL;
+  actor->rehearse(actor);
   return actor;
 }
 
-// Actor_List* NEW_ACTOR_LIST
-// creates a new Actor_List which points to nothing, but has an actor
-Actor_List* _train_actor_network(Actor* new_actor)
+// Protege* NEW_ACTOR_LIST
+// creates a new Protege which points to nothing, but has an actor
+Protege* _train_protege(Actor* new_actor)
 {
-  Actor_List* actor_list;
-  if(!(actor_list = malloc(sizeof(Actor_List)))) return NULL;
+  Protege* actor_list;
+  if(!(actor_list = malloc(sizeof(Protege)))) return NULL;
   actor_list->next=NULL;
   actor_list->actor = new_actor;
   return actor_list;
 }
 
-// Actor_List* ACTOR_LIST_NEW_LINK
-// creates a new Actor_List which links to another list
-Actor_List* _link_actor_network(Actor* new_actor, Actor_List* new_list)
+// Protege* ACTOR_LIST_NEW_LINK
+// creates a new Protege which links to another list
+Protege* _add_protege_to_proteges(Actor* new_actor, Protege* new_list)
 {
-  Actor_List* actor_list = _train_actor_network(new_actor);
+  Protege* actor_list = _train_protege(new_actor);
   actor_list->next = new_list;
   return actor_list;
 }
 
-void _remove_from_list(Actor* actor)
-{
-  Actor_List* tmp_list = actor->child_list;
-  actor->child_list = actor->child_list->next;
-  if(tmp_list == actor->list_beginning)
-  {
-    actor->list_beginning == actor->child_list;
-  }
-  _retire_actor(tmp_list->actor);
-  free(tmp_list);
-}
-
-void _retire_actor(Actor* actor)
-{
-  free(actor);
-}
-
 // void ACTOR_SPAWN_WITH_ENCORE
 // spawns a new actor, with a unique id
-void actor_spawn
+Actor* actor_spawn
 (
-  Actor* parent,
+  Actor* mentor,
   void(*rehearse)(Actor* actor),
   void(*script)(Actor* actor),
   int mem_size
 )
 {
-  Actor *actor = _train_actor(parent->mpi_rank+next_id*parent->mpi_size, rehearse, script, mem_size);
+  Actor *actor = _train_actor(mentor, mentor->mpi_rank+next_id*mentor->mpi_size, rehearse, script, mem_size);
   next_id++;
-  printf("Actor(%d) spawning actor(%d)\n", parent->id, actor->id);
-  actor->rehearse(actor);
-  if(parent->child_list != NULL)
+  printf("Actor(%d) spawning actor(%d)\n", mentor->id, actor->id);
+  if(mentor->proteges != NULL)
   {
-    parent->child_list->next = _link_actor_network(actor, parent->child_list->next);
+    mentor->proteges->next = _add_protege_to_proteges(actor, mentor->proteges->next);
   }
   else 
   {
-    parent->child_list = _link_actor_network(actor,NULL);
-    parent->list_beginning = parent->child_list;
+    mentor->proteges = _add_protege_to_proteges(actor,NULL);
+    mentor->first_protege = mentor->proteges;
   }
+  return actor;
 }
 
 // void NO_REHEARSAL
 // No initialisation for this actor
-void no_rehearsal(Actor* actor) {}
+void no_rehearse(Actor* actor) {}
 
 // void NO_SCRIPT
 // No task for this actor
-void no_script(Actor* actor) {}
+void no_script(Actor* actor)
+{
+  actor->retire = 1;
+}
