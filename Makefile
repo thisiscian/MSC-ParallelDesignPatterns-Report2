@@ -1,6 +1,6 @@
 CC=mpicc
-SOURCE=test.c actor/actor.c
-TARGET=test
+SOURCE=frog.c actor/actor.c provided-functions/frog-functions.c provided-functions/ran2.c
+TARGET=frog
 OBJECT=$(SOURCE:.c=.o)
 CFLAGS=-Wall
 

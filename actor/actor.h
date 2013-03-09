@@ -64,8 +64,10 @@ int _help_understudies(Actor *actor);
 
 // Functions that allow the sending and recieving of messages and props
 void read_line(Actor* me, int you, int message_type, int next_message_size);
+void read_line_to_all_proteges(Actor* me, int message_type, int next_message_size);
 void react_to_line(Actor* actor, void (*reaction)(Actor* actor, int message_type, int next_message_size));
 void give_props(Actor* me, int you, int prop_count, MPI_Datatype datatype, void* prop);
+void give_props_to_all_proteges(Actor* me, int prop_count, MPI_Datatype datatype, void* prop);
 void get_props(Actor*me, int prop_count, MPI_Datatype datatype, void* prop);
 
 // Default rehearsal and scripts

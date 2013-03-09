@@ -192,13 +192,28 @@ void read_line(Actor* me, int you, int message_type, int next_message_size)
   MPI_Isend(message, 2, MPI_INT, destination_rank, you, MPI_COMM_WORLD, &request);
 }
 
+void read_line_to_all_proteges(Actor* me, int message_type, int next_message_size)
+{
+  Protege* protege = me->first_protege;
+  while(protege != NULL)
+  {
+    read_line(actor, protege->actor->id, message_type, next_message_size);
+    protege = protege->next;
+  }
+}
+
 void react_to_line(Actor* actor, void (*reaction)(Actor* actor, int message_type, int next_message_size))
 {
   int message[2];
   int received;
   MPI_Request request;
   MPI_Status status;
-  MPI_Irecv(&message, 2, MPI_INT, MPI_ANY_SOURCE, actor->id, MPI_COMM_WORLD, &request);
+  MPI_Irecv(&message, 2, MPI_INT, MPI_ANY_SOURCE, -1, MPI_COMM_WORLD, &request);
+  MPI_Request_get_status(request, &received, &status);
+  if(!received)
+  { 
+    MPI_Irecv(&message, 2, MPI_INT, MPI_ANY_SOURCE, actor->id, MPI_COMM_WORLD, &request);
+  }
   MPI_Request_get_status(request, &received, &status);
   if(received)
   {
@@ -211,6 +226,16 @@ void give_props(Actor* me, int you, int prop_count, MPI_Datatype datatype, void*
   int destination_rank = you%me->mpi_size;
   MPI_Request request;
   MPI_Isend(prop, prop_count, MPI_INT, destination_rank, you, MPI_COMM_WORLD, &request);
+}
+
+void give_props_to_all_proteges(Actor* me int prop_count, MPI_Datatype datatype, void* prop)
+{
+  Protege* protege = me->first_protege;
+  while(protege != NULL)
+  {
+    give_props(me, protege->actor->id, prop_count, datatype, prop);
+    protege = protege->next;
+  }
 }
 
 void get_props(Actor* actor, int prop_count, MPI_Datatype datatype, void* prop)
