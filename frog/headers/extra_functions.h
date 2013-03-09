@@ -15,9 +15,9 @@ long state;
 enum {  
   MONSOON,
   HOP_IN,
-  FROG_SPAWN,
+  FROG_SPAWNED,
   FROG_SICK,
-  FROG_CROAK,
+  FROG_CROAKED,
   RETIRE
 };
 

@@ -1,5 +1,6 @@
 #include "../headers/extra_functions.h"
 
+
 // Standard min function definition
 int min(int a, int b)
 {
@@ -21,16 +22,21 @@ long* get_seed(Actor* actor)
 
 Role choose_role(int id)
 {
+  Role NULL_ROLE = {NULL,NULL,0};
   if(id == 0)
   {
     return timer_role;
   }
-  if(id > 0 && id <= initial_cell_count)
+  else if(id > 0 && id <= initial_cell_count)
   {
     return land_cell_role;
   }
-  else
+  else if(id > initial_cell_count)
   {
     return frog_role;
+  }
+  else
+  {
+    return NULL_ROLE;
   }
 }

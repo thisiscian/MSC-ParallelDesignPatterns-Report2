@@ -63,7 +63,7 @@ void timer_script(Actor* actor)
 void timer_reaction(Actor* actor, int message_type, int next_message_size)
 {
   Timer *t_props = actor->props;
-  if(message_type == FROG_SPAWN)
+  if(message_type == FROG_SPAWNED)
   {
     t_props->frog_count++;
   }
@@ -71,7 +71,7 @@ void timer_reaction(Actor* actor, int message_type, int next_message_size)
   {
     t_props->diseased_frog_count++;
   }
-  else if(message_type == FROG_CROAK)
+  else if(message_type == FROG_CROAKED)
   {
     t_props->frog_count--;
     t_props->diseased_frog_count--;

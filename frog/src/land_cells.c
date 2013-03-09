@@ -27,10 +27,12 @@ void land_cell_reaction(Actor* actor, int message_type, int next_message_size)
   } 
   else if(message_type == HOP_IN)
   {
-    int new_disease_value;
-    lc_props->population_influx = 0;
-    get_props(actor, next_message_size, MPI_INT, &new_disease_value);
-    lc_props->infection_level += new_disease_value;
+    int my_data[2] = {lc_props->population_influx, lc_props->infection_level};
+    int frog_data[2];
+    get_props(actor, next_message_size, MPI_INT, frog_data);
+    give_props(actor, frog_data[0], 2, MPI_INT, my_data);
+    lc_props->population_influx++;
+    lc_props->infection_level += frog_data[1];
   }
   else if(message_type == RETIRE)
   {

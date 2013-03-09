@@ -14,6 +14,8 @@
 // global variable currently needed for unique ID of actors
 int next_id = 1;
 
+// Define the NULL ROLE, an empty role
+
 // Initialise MPI and create one actor per process, who's id is the rank of the
 // host process. The input variables are functions which returns function
 // pointers; this means that you can functionally choose which script each 
@@ -21,15 +23,12 @@ int next_id = 1;
 Actor* actor_initialise_metaphor (Role (*choose_role)(int id))
 {
   int mpi_rank;
-  Role null_role;
   MPI_Init(NULL,NULL);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  null_role.script=NULL;
-  null_role.rehearse=NULL;
-  null_role.memory_required=0;
+  Role NULL_ROLE = {NULL,NULL,0};
   if(choose_role == NULL)
   {
-    return _train_actor(NULL, mpi_rank, null_role);
+    return _train_actor(NULL, mpi_rank, NULL_ROLE);
   }
   else
   {
@@ -50,46 +49,67 @@ void actor_finalise_metaphor(){
 // to stop. Other actors only run their start process once .
 int perform(Actor *actor)
 {
-  int lines_read = 0;
+  int performances = 0;
   do
   {
     if(actor->mentor == NULL)
     {
-      lines_read = 0;
+      performances = 0;
     }
     if(!actor->retire)
     {
       actor->script(actor);
-      lines_read++;
+      performances++;
     }
-    lines_read += _help_proteges(actor);
+    performances += _help_proteges(actor);
   }
-  while(lines_read > 0 && actor->mentor == NULL);
-  return lines_read;
+  while(performances > 0 && actor->mentor == NULL);
+  if(actor->mentor == NULL || performances == 0)
+  {
+     _retire_actor(actor);
+  }
+  return performances;
 }
 
-// void ACTOR_RUN_CHILD_ITERATION
-// runs through each child of an actor and tells it to start
 int _help_proteges(Actor *actor)
 {
-  int lines_read = 0;
+  int protege_count = 0;
+  int current_protege = 0;
   while(actor->proteges != NULL)
   {
-    lines_read += perform(actor->proteges->actor);
-    actor->proteges = actor->proteges->next;
+    if(perform(actor->proteges->actor))
+    {
+      protege_count++;
+      actor->proteges = actor->proteges->next;
+    }
+    else
+    {
+      _retire_protege(actor);
+    }
   }
   actor->proteges = actor->first_protege;
-  return lines_read;
+  return protege_count;
 }
 
-// void INITIALISE_ACTOR
-// initialise an actor with no children, and a given id, script and prop set
-Actor* _train_actor
-(
-  Actor* new_mentor,
-  int new_id,
-  Role role
-)
+void _retire_actor(Actor* actor)
+{
+  free(actor->props);
+  free(actor);
+}
+
+void _retire_protege(Actor* actor)
+{
+  Protege* retiree = actor->proteges;
+  actor->proteges = actor->proteges->next;
+  if(retiree == actor->first_protege)
+  {
+    actor->first_protege = actor->proteges;
+  }
+  _retire_actor(retiree->actor);
+  free(retiree);
+}
+
+Actor* _train_actor (Actor* new_mentor, int new_id, Role role)
 {
   Actor *actor = (Actor*) malloc(sizeof(Actor));
   actor->id = new_id;
@@ -126,15 +146,14 @@ Protege* _add_protege_to_proteges(Actor* new_actor, Protege* new_list)
   return actor_list;
 }
 
-// void ACTOR_SPAWN_WITH_ENCORE
-// spawns a new actor, with a unique id
-Actor* actor_train_protege
-(
-  Actor* mentor,
-  Role role
-)
+int get_next_id(Actor* actor)
 {
-  Actor *actor = _train_actor(mentor, mentor->mpi_rank+next_id*mentor->mpi_size, role);
+   return actor->mpi_rank+next_id*actor->mpi_size; 
+}
+
+Actor* actor_train_protege (Actor* mentor, Role role)
+{
+  Actor *actor = _train_actor(mentor, get_next_id(mentor), role);
   next_id++;
   printf("Actor(%d) spawning actor(%d)\n", mentor->id, actor->id);
   if(mentor->proteges != NULL)

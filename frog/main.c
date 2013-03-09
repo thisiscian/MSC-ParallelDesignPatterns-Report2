@@ -10,6 +10,7 @@ int main()
   // Note that this is a normal actor type, it is no different to any
   // other actor.
   Actor *lead_actor;
+  Actor *test_actor;
 
   // Set up global variables
   initial_frog_count = 34;
@@ -20,6 +21,12 @@ int main()
 
   // Define the lead_actor according to the functions that follow;
   lead_actor = actor_initialise_metaphor(choose_role);
+
+  // Assign actors to the remaining initial roles
+  do {
+    test_actor = actor_train_protege(lead_actor, choose_role(get_next_id(lead_actor)));
+  }
+  while (test_actor->script != NULL);
   
   // Have the lead_actor perform it's script, and thus all protege jobs underneath it
   perform(lead_actor); 

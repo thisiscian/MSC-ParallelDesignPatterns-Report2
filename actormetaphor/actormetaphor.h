@@ -46,7 +46,9 @@ struct Actor_s{
                                     // jobs that this actor runs in a loop
 
   struct Actor_s *mentor;           // parent `Actor` of this actor
+
   struct Protege_s *proteges;       // linked list containing child `Actors` of this actor
+
   struct Protege_s *first_protege;  // points to first protege, for returning to top of list
 };
 
@@ -79,12 +81,10 @@ Actor* _train_actor
   Role role;
 );
 
+int get_next_id(Actor* actor);
+
 // Spawns an actor atached to a specific parent
-Actor* actor_train_protege
-(
-  Actor* mentor,
-  Role role;
-);
+Actor* actor_train_protege (Actor* mentor, Role role);
 
 // Creates an unattached protege
 Protege* _train_protege(Actor *new_actor);
@@ -93,7 +93,7 @@ Protege* _train_protege(Actor *new_actor);
 Protege* _add_protege_to_proteges(Actor *new_actor, Protege *new_list);
 
 // Removes a Protege from the Proteges List
-void _remove_from_list(Actor* actor);
+void _retire_protege(Actor* actor);
 
 // Removes an actor and frees memory associated with them
 void _retire_actor(Actor* actor);
