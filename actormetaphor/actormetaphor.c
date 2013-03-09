@@ -1,10 +1,12 @@
+//
+// Part of the `actormetaphor` library
+//
 // Functions used to call the Actor Model using MPI
 // Each MPI process spawns at least one actor
 // However, each MPI process can have any amount of actors, by having the
 // initial actor spawn more
 
-#include "actor.h"
-#include <mpi.h>
+#include "actormetaphor.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -12,54 +14,32 @@
 // global variable currently needed for unique ID of actors
 int next_id = 1;
 
-// Actor* INITIALISE_MODEL
 // Initialise MPI and create one actor per process, who's id is the rank of the
 // host process. The input variables are functions which returns function
 // pointers; this means that you can functionally choose which script each 
 // actor reads from, when you start the model.
-Actor* initialise_actor_model
-(
-  void (*choose_rehearse_function(int id))(Actor *actor),
-  void (*choose_script_function(int id))(Actor* actor),
-  int (*choose_amount_of_memory_to_allocate)(int id)
-)
+Actor* actor_initialise_metaphor (Role (*choose_role)(int id))
 {
   int mpi_rank;
-  void (*rehearse_function)(Actor *actor);
-  void (*script_function)(Actor *actor);
-  int amount_of_memory_to_allocate = 0;
+  Role null_role;
   MPI_Init(NULL,NULL);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  if(choose_rehearse_function == NULL)
+  null_role.script=NULL;
+  null_role.rehearse=NULL;
+  null_role.memory_required=0;
+  if(choose_role == NULL)
   {
-    rehearse_function = no_rehearse;
+    return _train_actor(NULL, mpi_rank, null_role);
   }
   else
   {
-    rehearse_function = choose_rehearse_function(mpi_rank);
+    return _train_actor(NULL, mpi_rank, choose_role(mpi_rank));
   }
-  if(choose_script_function == NULL)
-  {
-    script_function = no_script;
-  }
-  else
-  {
-    script_function = choose_script_function(mpi_rank);
-  }
-  if(choose_amount_of_memory_to_allocate == NULL)
-  {
-    amount_of_memory_to_allocate = 0;
-  }
-  else
-  {
-    amount_of_memory_to_allocate = choose_amount_of_memory_to_allocate(mpi_rank);
-  }
-  return _train_actor(NULL, mpi_rank, rehearse_function, script_function, amount_of_memory_to_allocate);
 }
 
 // void FINALISE_MODEL
 // finalise MPI and the actor model
-void finalise_actor_model(){
+void actor_finalise_metaphor(){
   MPI_Finalize();
 }
 
@@ -68,7 +48,7 @@ void finalise_actor_model(){
 // their 'script' and then starting any children it may have. Special case for
 // the first actors on an mpi process; they keep running until they are told
 // to stop. Other actors only run their start process once .
-int read_script(Actor *actor)
+int perform(Actor *actor)
 {
   int lines_read = 0;
   do
@@ -82,7 +62,7 @@ int read_script(Actor *actor)
       actor->script(actor);
       lines_read++;
     }
-    lines_read += _help_understudies(actor);
+    lines_read += _help_proteges(actor);
   }
   while(lines_read > 0 && actor->mentor == NULL);
   return lines_read;
@@ -90,12 +70,12 @@ int read_script(Actor *actor)
 
 // void ACTOR_RUN_CHILD_ITERATION
 // runs through each child of an actor and tells it to start
-int _help_understudies(Actor *actor)
+int _help_proteges(Actor *actor)
 {
   int lines_read = 0;
   while(actor->proteges != NULL)
   {
-    lines_read += read_script(actor->proteges->actor);
+    lines_read += perform(actor->proteges->actor);
     actor->proteges = actor->proteges->next;
   }
   actor->proteges = actor->first_protege;
@@ -108,9 +88,7 @@ Actor* _train_actor
 (
   Actor* new_mentor,
   int new_id,
-  void (*new_rehearse)(Actor* actor),
-  void (*new_script)(Actor* actor),
-  int mem_size
+  Role role
 )
 {
   Actor *actor = (Actor*) malloc(sizeof(Actor));
@@ -118,9 +96,9 @@ Actor* _train_actor
   MPI_Comm_rank(MPI_COMM_WORLD, &(actor->mpi_rank));
   MPI_Comm_size(MPI_COMM_WORLD, &(actor->mpi_size));
   actor->retire = 0;
-  actor->script = new_script;
-  actor->rehearse = new_rehearse;
-  actor->props = malloc(mem_size);
+  actor->script = role.script;
+  actor->rehearse = role.rehearse;
+  actor->props = malloc(role.memory_required);
   actor->proteges = NULL;
   actor->mentor = new_mentor;
   actor->first_protege = NULL;
@@ -150,15 +128,13 @@ Protege* _add_protege_to_proteges(Actor* new_actor, Protege* new_list)
 
 // void ACTOR_SPAWN_WITH_ENCORE
 // spawns a new actor, with a unique id
-Actor* actor_spawn
+Actor* actor_train_protege
 (
   Actor* mentor,
-  void(*rehearse)(Actor* actor),
-  void(*script)(Actor* actor),
-  int mem_size
+  Role role
 )
 {
-  Actor *actor = _train_actor(mentor, mentor->mpi_rank+next_id*mentor->mpi_size, rehearse, script, mem_size);
+  Actor *actor = _train_actor(mentor, mentor->mpi_rank+next_id*mentor->mpi_size, role);
   next_id++;
   printf("Actor(%d) spawning actor(%d)\n", mentor->id, actor->id);
   if(mentor->proteges != NULL)
@@ -173,18 +149,7 @@ Actor* actor_spawn
   return actor;
 }
 
-// void NO_REHEARSAL
-// No initialisation for this actor
-void no_rehearse(Actor* actor) {}
-
-// void NO_SCRIPT
-// No task for this actor
-void no_script(Actor* actor)
-{
-  actor->retire = 1;
-}
-
-void read_line(Actor* me, int you, int message_type, int next_message_size)
+void enter_dialogue(Actor* me, int you, int message_type, int next_message_size)
 {
   int destination_rank = you%me->mpi_size;
   int message[2] = {message_type, next_message_size}; 
@@ -192,17 +157,17 @@ void read_line(Actor* me, int you, int message_type, int next_message_size)
   MPI_Isend(message, 2, MPI_INT, destination_rank, you, MPI_COMM_WORLD, &request);
 }
 
-void read_line_to_all_proteges(Actor* me, int message_type, int next_message_size)
+void enter_dialogue_with_all_proteges(Actor* actor, int message_type, int next_message_size)
 {
-  Protege* protege = me->first_protege;
+  Protege* protege = actor->first_protege;
   while(protege != NULL)
   {
-    read_line(actor, protege->actor->id, message_type, next_message_size);
+    enter_dialogue(actor, protege->actor->id, message_type, next_message_size);
     protege = protege->next;
   }
 }
 
-void react_to_line(Actor* actor, void (*reaction)(Actor* actor, int message_type, int next_message_size))
+void respond_to_dialogue(Actor* actor, void (*reaction)(Actor* actor, int message_type, int next_message_size))
 {
   int message[2];
   int received;
@@ -228,12 +193,12 @@ void give_props(Actor* me, int you, int prop_count, MPI_Datatype datatype, void*
   MPI_Isend(prop, prop_count, MPI_INT, destination_rank, you, MPI_COMM_WORLD, &request);
 }
 
-void give_props_to_all_proteges(Actor* me int prop_count, MPI_Datatype datatype, void* prop)
+void give_props_to_all_proteges(Actor* actor, int prop_count, MPI_Datatype datatype, void* prop)
 {
-  Protege* protege = me->first_protege;
+  Protege* protege = actor->first_protege;
   while(protege != NULL)
   {
-    give_props(me, protege->actor->id, prop_count, datatype, prop);
+    give_props(actor, protege->actor->id, prop_count, datatype, prop);
     protege = protege->next;
   }
 }
@@ -250,3 +215,13 @@ void get_props(Actor* actor, int prop_count, MPI_Datatype datatype, void* prop)
     printf("I have received\n");
   }
 }
+
+// No initialisation for this actor
+void no_rehearse(Actor* actor) {}
+
+// No task for this actor
+void no_script(Actor* actor)
+{
+  actor->retire = 1;
+}
+

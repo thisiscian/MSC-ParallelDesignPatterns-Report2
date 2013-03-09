@@ -1,19 +1,30 @@
-CC=mpicc
-SOURCE=frog.c actor/actor.c provided-functions/frog-functions.c provided-functions/ran2.c
-TARGET=frog
-OBJECT=$(SOURCE:.c=.o)
-CFLAGS=-Wall
+NPROC=2
+LIBRARY_DIR=actormetaphor
+TEST_DIR=test
+TEST_RUN=test_exec
+FROG_DIR=frog
+FROG_RUN=frog_exec
 
-all: $(TARGET)
+all: library test frog
 
-$(TARGET): $(OBJECT)
-	$(CC) $(CFLAGS) -o $@ $(OBJECT)
+library:
+	cd $(LIBRARY_DIR) && make
 
-clean: 
-	@rm -f $(TARGET) $(OBJECT)
+test: library
+	cd $(TEST_DIR) && make $(TEST_RUN)
 
-run: $(TARGET)
-	mpiexec -n 2 ./$(TARGET)
+run_test: test
+	mpiexec -n $(NPROC) ./$(TEST_RUN)
 
-$(OBJECT): Makefile 
+frog: library
+	cd $(FROG_DIR) && make $(FROG_RUN)
+
+run_frog: frog
+	mpiexec -n $(NPROC) ./$(FROG_RUN)
+
+clean:
+	@echo "Cleaning all directories..."
+	@cd $(LIBRARY_DIR) && make clean
+	@cd $(FROG_DIR) && make clean
+	@cd $(TEST_DIR) && make clean
 
