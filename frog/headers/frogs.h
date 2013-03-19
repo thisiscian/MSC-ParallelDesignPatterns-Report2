@@ -11,7 +11,7 @@ int max_frog_count;
 extern Role frog_role;
 
 typedef struct {
-  long* state;
+  long state;
   float x;
   float y;
   int diseased;

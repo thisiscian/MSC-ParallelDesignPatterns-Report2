@@ -6,8 +6,9 @@ void frog_initialisation(Actor* actor)
 {
   int i;
   Frog *f_props = actor->props;
-  f_props->state = get_seed(actor);
-  frogHop(0, 0, &(f_props->x), &(f_props->y), f_props->state);
+	initialiseRNG(&(f_props->state));
+  //f_props->state = get_seed(actor);
+  frogHop(0, 0, &(f_props->x), &(f_props->y), &(f_props->state));
 	if(actor->id%2 == 0)
 	{
   	f_props->diseased=0;
@@ -42,7 +43,7 @@ void frog_script(Actor* actor)
 	else if(actor->act_number == OPEN_CURTAINS)
 	{
   	int my_stats[2] = {actor->id, f_props->diseased};
-  	frogHop(f_props->x, f_props->y, &(f_props->x), &(f_props->y), f_props->state);
+  	frogHop(f_props->x, f_props->y, &(f_props->x), &(f_props->y), &(f_props->state));
   	f_props->hop_count++;
   	f_props->current_cell = getCellFromPosition(f_props->x, f_props->y);
   	enter_dialogue(actor, f_props->current_cell+1,A_FROG_HOPS_INTO_THE_UNKNOWN);
@@ -63,7 +64,7 @@ void frog_script(Actor* actor)
 		    average_cell_population += f_props->population_history[i];
 		  }
 	  	average_cell_population/=300;
-			if(willGiveBirth(average_cell_population, f_props->state))
+			if(willGiveBirth(average_cell_population, &(f_props->state)))
 			{
 				enter_dialogue(actor, 0, A_FROG_SPAWNS);
 				Actor* baby_frog;
@@ -89,7 +90,7 @@ void frog_script(Actor* actor)
 		  }
 		  average_cell_infection/=500;
 	
-			if(willCatchDisease(average_cell_infection, f_props->state) && !f_props->diseased)
+			if(willCatchDisease(average_cell_infection, &(f_props->state)) && !f_props->diseased)
 			{
 				printf("Frog(%d) is sick\n", actor->id);
 				enter_dialogue(actor, 0, A_FROG_CONTRACTS_THE_PLAGUE);
@@ -97,7 +98,7 @@ void frog_script(Actor* actor)
 				f_props->diseased=1; 
 			}
 		}
-		if(f_props->hop_count%700  == 0 && f_props->diseased && willDie(f_props->state))
+		if(f_props->hop_count%700  == 0 && f_props->diseased && willDie(&(f_props->state)))
 		{
   	  enter_dialogue(actor, 0, A_FROG_CROAKS);
   	  actor->retire = 1;

@@ -2,6 +2,7 @@
 #define __FROG_EXTRA_H__
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "../provided-functions/ran2.h"
 #include "frogs.h"
