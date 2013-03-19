@@ -49,7 +49,7 @@ void actor_finalise_metaphor(){
 	int flag;
 	int count;
 	MPI_Status status;
-	void *var;
+	int *var;
 	MPI_Iprobe(process_rank, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	while(flag)
 	{
@@ -160,7 +160,13 @@ Actor* _train_actor (Actor* new_mentor, int new_id, Role role)
 	{
 		actor->script = role.script;
   	actor->rehearse = role.rehearse;
-  	actor->props = malloc(role.memory_required);
+		void *prop = malloc(role.memory_required);
+		if(prop)
+		{
+			printf("Prop=NULL!\n");
+		}
+
+  	actor->props = prop;
   	actor->rehearse(actor);
 	}
 	else

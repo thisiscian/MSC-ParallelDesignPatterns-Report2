@@ -8,6 +8,7 @@ void frog_initialisation(Actor* actor)
   Frog *f_props = actor->props;
   get_seed(actor);
   frogHop(0, 0, &(f_props->x), &(f_props->y), &state);
+	f_props->current_cell = (getCellFromPosition(f_props->x, f_props->y)%initial_cell_count+initial_cell_count)%initial_cell_count;
 	if(actor->id%2 == 0)
 	{
   	f_props->diseased=0;
@@ -19,7 +20,6 @@ void frog_initialisation(Actor* actor)
 		enter_dialogue(actor, f_props->current_cell+1, A_FROG_CONTRACTS_THE_PLAGUE);
 	}
   f_props->hop_count=0;
-	f_props->current_cell = (getCellFromPosition(f_props->x, f_props->y)%initial_cell_count+initial_cell_count)%initial_cell_count;
 
   for(i=0; i<300; i++)
   {
