@@ -5,8 +5,7 @@ Role land_cell_role = {land_cell_initialisation, land_cell_script, sizeof(Land_C
 void land_cell_initialisation(Actor* actor)
 {
   Land_Cell *lc_props = actor->props;
-
-  lc_props->state = get_seed(actor);
+  get_seed(actor);
   lc_props->population_influx=0;
   lc_props->infection_level=0;
 

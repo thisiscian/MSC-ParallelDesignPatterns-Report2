@@ -141,8 +141,8 @@ void _retire_protege(Actor* actor)
 int is_null_role(Role role)
 {
 	int boole = role.script == NULL_ROLE.script;
-	boole ^= role.rehearse == NULL_ROLE.rehearse;
-	boole ^= role.memory_required == NULL_ROLE.memory_required;
+	boole &= role.rehearse == NULL_ROLE.rehearse;
+	boole &= role.memory_required == NULL_ROLE.memory_required;
 	return boole;
 }
 
@@ -212,7 +212,8 @@ int get_next_id()
 
 Actor* actor_train_protege (Actor* mentor, Role role)
 {
-  Actor *actor = _train_actor(mentor, get_next_id(), role);
+  Actor *actor;
+	actor = _train_actor(mentor, get_next_id(), role);
   if(mentor->proteges != NULL)
   {
     mentor->proteges->next = _add_protege_to_proteges(actor, mentor->proteges->next);

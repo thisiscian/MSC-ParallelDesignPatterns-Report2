@@ -1,4 +1,4 @@
-CC=mpicc
+CC=cc
 SOURCE=actormetaphor.c
 HEADER=actormetaphor.h
 TARGET=libactormetaphor.a
@@ -7,7 +7,7 @@ CFLAGS=-g
 
 all:
 	@echo "Making actormetaphor library..."
-	@mpicc -c $(SOURCE) $(CFLAGS)
+	@$(CC) -c $(SOURCE) $(CFLAGS)
 	@ar -rs $(TARGET) $(OBJECT) $(HEADER)
 
 clean: 

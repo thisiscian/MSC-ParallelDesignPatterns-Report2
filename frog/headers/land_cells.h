@@ -8,7 +8,6 @@ int initial_cell_count;
 extern Role land_cell_role;
 
 typedef struct {
-  long *state;
   int population_influx;
   int infection_level;
 } Land_Cell;

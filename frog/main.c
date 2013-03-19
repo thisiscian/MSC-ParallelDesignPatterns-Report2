@@ -40,7 +40,6 @@ int main(int argc, char* argv[])
   // Define the lead_actor according to the functions that follow;
   lead_actor = actor_initialise_metaphor(choose_role);
   // Assign actors to the remaining initial roles
- 	setbuf(stdout, NULL); 
 	int id = peek_next_id();
 	while (id <= initial_frog_count + initial_cell_count)
 	{
