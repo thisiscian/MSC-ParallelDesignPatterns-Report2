@@ -8,7 +8,6 @@ void land_cell_initialisation(Actor* actor)
   get_seed(actor);
   lc_props->population_influx=0;
   lc_props->infection_level=0;
-
 	actor->act_number=OPEN_CURTAINS;
 }
 

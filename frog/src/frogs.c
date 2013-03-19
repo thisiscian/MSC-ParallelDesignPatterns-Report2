@@ -6,14 +6,9 @@ void frog_initialisation(Actor* actor)
 {
   int i;
   Frog *f_props = actor->props;
-<<<<<<< HEAD
-	initialiseRNG(&(f_props->state));
-  //f_props->state = get_seed(actor);
-  frogHop(0, 0, &(f_props->x), &(f_props->y), &(f_props->state));
-=======
   get_seed(actor);
   frogHop(0, 0, &(f_props->x), &(f_props->y), &state);
->>>>>>> 35bef11f6d0b0978af407f375cd6a28c5907edff
+	f_props->current_cell = (getCellFromPosition(f_props->x, f_props->y)%initial_cell_count+initial_cell_count)%initial_cell_count;
 	if(actor->id%2 == 0)
 	{
   	f_props->diseased=0;
@@ -25,7 +20,6 @@ void frog_initialisation(Actor* actor)
 		enter_dialogue(actor, f_props->current_cell+1, A_FROG_CONTRACTS_THE_PLAGUE);
 	}
   f_props->hop_count=0;
-	f_props->current_cell = (getCellFromPosition(f_props->x, f_props->y)%initial_cell_count+initial_cell_count)%initial_cell_count;
 
   for(i=0; i<300; i++)
   {
@@ -48,12 +42,7 @@ void frog_script(Actor* actor)
 	else if(actor->act_number == OPEN_CURTAINS)
 	{
   	int my_stats[2] = {actor->id, f_props->diseased};
-<<<<<<< HEAD
-  	frogHop(f_props->x, f_props->y, &(f_props->x), &(f_props->y), &(f_props->state));
-=======
-		long* A = &state;
   	frogHop(f_props->x, f_props->y, &(f_props->x), &(f_props->y), &state);
->>>>>>> 35bef11f6d0b0978af407f375cd6a28c5907edff
   	f_props->hop_count++;
 		f_props->current_cell = (getCellFromPosition(f_props->x, f_props->y)%initial_cell_count+initial_cell_count)%initial_cell_count;
   	enter_dialogue(actor, f_props->current_cell+1,A_FROG_HOPS_INTO_THE_UNKNOWN);

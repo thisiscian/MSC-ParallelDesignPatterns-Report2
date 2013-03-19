@@ -46,9 +46,10 @@ int main(int argc, char* argv[])
     test_actor = actor_train_protege(lead_actor, choose_role(id));	
 		id = peek_next_id();
   }
+	printf("working here\n");
   // Have the lead_actor perform it's script, and thus all protege jobs underneath it
   perform(lead_actor); 
-  
+  printf("no more work for me\n");
   // Stop the metaphor
   actor_finalise_metaphor();
   return 0;

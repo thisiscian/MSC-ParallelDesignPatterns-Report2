@@ -1,4 +1,4 @@
-CC=cc
+CC=mpicc
 ACTOR_DIR=../actormetaphor
 ACTOR_LIB=actormetaphor
 PROVIDED_DIR=provided-functions
