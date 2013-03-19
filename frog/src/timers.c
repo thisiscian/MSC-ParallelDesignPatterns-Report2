@@ -8,8 +8,7 @@ Role timer_role = {timer_initialisation, timer_script, sizeof(Timer)};
 void timer_initialisation(Actor* actor)
 {
   Timer *t_props = actor->props;
-
-  t_props->state = get_seed(actor);
+  get_seed(actor);
   t_props->frog_count = initial_frog_count;
   t_props->diseased_frog_count = 0;
   t_props->year_start= MPI_Wtime();
@@ -72,7 +71,6 @@ void timer_script(Actor* actor)
 			{
 				enter_dialogue(actor, i, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
 			}
-			printf("Done sending monsoonz\n");
 		}
 	}
 	else if(actor->act_number == A_FROG_SPAWNS)

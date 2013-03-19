@@ -9,7 +9,6 @@ double year_length;
 extern Role timer_role;
 
 typedef struct {
-  long *state;
   int frog_count;
   int diseased_frog_count;
   double year_start;
