@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
  		max_frog_count = 100;
   	max_time = 100;
 		year_length = 1;
-		buff_size = 10000*sizeof(double);
+		buff_size = 5000*sizeof(double);
 	}
 
   // Define the lead_actor according to the functions that follow;

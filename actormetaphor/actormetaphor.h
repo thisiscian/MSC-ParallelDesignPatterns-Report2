@@ -13,6 +13,7 @@
 #define __PDP_ACTOR_H__
 
 #include <mpi.h>
+#include <stdlib.h>
 
 extern int number_of_processes;
 extern int process_rank;
