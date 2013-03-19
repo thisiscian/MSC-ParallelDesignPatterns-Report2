@@ -14,6 +14,9 @@
 
 #include <mpi.h>
 
+extern int number_of_processes;
+extern int process_rank;
+extern int buff_size;
 // This typedef is done to allow the struct Actor_s to use Protege_s before
 // it is defined
 typedef struct Protege_s Protege_s;
@@ -28,12 +31,15 @@ typedef struct Role_s Role;
 struct Actor_s{
   int id;                           // unique internal identifier
 
-  int mpi_rank;                     // rank of mpi process
-
-  int mpi_size;                     // number of mpi processes
-
   int retire;                       // flag to indicating that no more jobs
                                     // should be run
+  
+	int poison_pill;									// kills entire process immediately	
+
+	int act_number;										// flag indicating which portion of the
+																		// script should be read
+
+	int sender;												// id of actor sending message currently
 
   void *props;                      // should point to struct containing
                                     // variables related to the actor
@@ -44,7 +50,7 @@ struct Actor_s{
 
   void (*script)();                 // user defined function containing the
                                     // jobs that this actor runs in a loop
-
+                                    
   struct Actor_s *mentor;           // parent `Actor` of this actor
 
   struct Protege_s *proteges;       // linked list containing child `Actors` of this actor
@@ -66,6 +72,10 @@ struct Role_s{
   int memory_required;
 };
 
+extern Role NULL_ROLE;
+
+int is_null_role(Role role);
+
 // Initialises the actor model, using input functions that control what the 
 // initial actors on each process run
 Actor* actor_initialise_metaphor(Role (*choose_roll)(int id));
@@ -74,16 +84,12 @@ Actor* actor_initialise_metaphor(Role (*choose_roll)(int id));
 void actor_finalise_metaphor();
 
 // Creates a new actor, unattached to any parent
-Actor* _train_actor
-(
-  Actor* mentor,
-  int internal_id,
-  Role role;
-);
+Actor* _train_actor (Actor* mentor, int internal_id, Role role);
 
-int get_next_id(Actor* actor);
+int peek_next_id();
+int get_next_id();
 
-// Spawns an actor atached to a specific parent
+// Spawns an actor attached to a specific parent
 Actor* actor_train_protege (Actor* mentor, Role role);
 
 // Creates an unattached protege
@@ -95,9 +101,6 @@ Protege* _add_protege_to_proteges(Actor *new_actor, Protege *new_list);
 // Removes a Protege from the Proteges List
 void _retire_protege(Actor* actor);
 
-// Removes an actor and frees memory associated with them
-void _retire_actor(Actor* actor);
-
 // Tells actor to run one iteration of their job
 int perform(Actor *actor);
 
@@ -105,10 +108,10 @@ int perform(Actor *actor);
 int _help_proteges(Actor *actor);
 
 // Functions that allow the sending and recieving of messages and props
-void enter_dialogue(Actor* me, int you, int message_type, int next_message_size);
+void enter_dialogue(Actor* me, int you, int message_type);
 
-void enter_dialogue_with_all_proteges(Actor* me, int message_type, int next_message_size);
-void respond_to_dialogue(Actor* actor, void (*reaction)(Actor* actor, int message_type, int next_message_size));
+void enter_dialogue_with_all_proteges(Actor* me, int message_type);
+void respond_to_dialogue(Actor* actor);
 void give_props(Actor* me, int you, int prop_count, MPI_Datatype datatype, void* prop);
 void give_props_to_all_proteges(Actor* me, int prop_count, MPI_Datatype datatype, void* prop);
 void get_props(Actor*me, int prop_count, MPI_Datatype datatype, void* prop);

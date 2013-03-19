@@ -1,10 +1,10 @@
-CC=mpicc
+CC=vtcc
 ACTOR_DIR=../actormetaphor
 ACTOR_LIB=actormetaphor
 SOURCE=test.c
 TARGET=test_exec
 OBJECT=$(SOURCE:.c=.o)
-CFLAGS=-Wall -lm -l$(ACTOR_LIB) -L$(ACTOR_DIR) -I$(ACTOR_DIR)
+CFLAGS=-lm -l$(ACTOR_LIB) -L$(ACTOR_DIR) -I$(ACTOR_DIR) -I/opt/mpich2-gnu/include -L/opt/mpich2-gnu/lib -lmpich -lopa -lmpl -lrt -lpthread
 
 all: $(TARGET)
 

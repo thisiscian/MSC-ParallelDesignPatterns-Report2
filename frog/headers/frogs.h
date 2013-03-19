@@ -8,7 +8,7 @@
 
 int initial_frog_count;
 int max_frog_count;
-Role frog_role;
+extern Role frog_role;
 
 typedef struct {
   long* state;
@@ -16,13 +16,13 @@ typedef struct {
   float y;
   int diseased;
   int hop_count;
+	int current_cell;
   int population_history[300];
-  int infection_history[700];
+  int infection_history[500];
 } Frog;
 
 void frog_initialisation(Actor* actor);
 void frog_script(Actor* actor);
-void frog_reaction(Actor* actor, int message_type, int next_message_size);
 
 #endif
 

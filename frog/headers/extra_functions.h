@@ -12,15 +12,18 @@ long state;
 
 // List of possible messages to send; this just makes message passing a bit
 // clearer for the user, it's not necessary
-enum {  
-  MONSOON,
-  HOP_IN,
-  FROG_SPAWNED,
-  FROG_SICK,
-  FROG_CROAKED,
-  RETIRE
+enum {
+  CLOSE_CURTAINS=1,
+	OPEN_CURTAINS,
+	OFF_STAGE,
+	A_FROG_SURVEYS_THE_LAND,
+  A_MONSOON_BRINGS_IN_THE_NEW_YEAR,
+  A_FROG_HOPS_INTO_THE_UNKNOWN,
+	A_FROG_SPEAKS_OF_ITS_HEALTH,
+  A_FROG_SPAWNS,
+  A_FROG_CONTRACTS_THE_PLAGUE,
+  A_FROG_CROAKS
 };
-
 
 long* get_seed(Actor* actor);
 Role choose_role(int id);

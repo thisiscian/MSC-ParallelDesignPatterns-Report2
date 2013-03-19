@@ -5,7 +5,7 @@ TEST_RUN=test_exec
 FROG_DIR=frog
 FROG_RUN=frog_exec
 
-all: library test frog
+all: library frog
 
 library:
 	cd $(LIBRARY_DIR) && make
@@ -14,13 +14,13 @@ test: library
 	cd $(TEST_DIR) && make $(TEST_RUN)
 
 run_test: test
-	mpiexec -n $(NPROC) ./$(TEST_RUN)
+	mpiexec -n $(NPROC) $(TEST_DIR)/$(TEST_RUN)
 
 frog: library
 	cd $(FROG_DIR) && make $(FROG_RUN)
 
 run_frog: frog
-	mpiexec -n $(NPROC) ./$(FROG_RUN)
+	mpiexec -n $(NPROC) $(FROG_DIR)/$(FROG_RUN)
 
 clean:
 	@echo "Cleaning all directories..."

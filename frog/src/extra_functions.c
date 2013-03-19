@@ -1,6 +1,5 @@
 #include "../headers/extra_functions.h"
 
-
 // Standard min function definition
 int min(int a, int b)
 {
@@ -12,9 +11,9 @@ int min(int a, int b)
 // state for that process
 long* get_seed(Actor* actor)
 {
-  if(actor->id < actor->mpi_size)
+  if(actor->id < number_of_processes)
   {
-    state = -1 - actor->id;
+    state = -1-(actor->id);
     initialiseRNG(&state);
   }
   return &state;
@@ -22,7 +21,6 @@ long* get_seed(Actor* actor)
 
 Role choose_role(int id)
 {
-  Role NULL_ROLE = {NULL,NULL,0};
   if(id == 0)
   {
     return timer_role;
@@ -31,7 +29,7 @@ Role choose_role(int id)
   {
     return land_cell_role;
   }
-  else if(id > initial_cell_count)
+  else if(id > initial_cell_count && id <= initial_cell_count+initial_frog_count)
   {
     return frog_role;
   }

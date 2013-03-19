@@ -1,0 +1,17 @@
+#!/bin/bash
+#$ -V
+#$ -l h_rt=:20:
+#$ -pe mpi 2
+#$ -cwd
+#$ -o Output/
+#$ -e Output/Error/
+
+output=frog/frog_exec
+
+
+if [[ x$1x == xCOMx ]]; then
+	make clean && make
+	time mpiexec -n 2 $output
+else
+	qsub -N PDP_test $0 COM
+fi

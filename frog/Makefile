@@ -9,7 +9,7 @@ EXTRA=$(PROVIDED_DIR)/frog-functions.c $(PROVIDED_DIR)/ran2.c $(SRC_DIR)/frogs.c
 TARGET=frog_exec
 OBJECT=$(SOURCE:.c=.o)
 EXTRA_OBJECT=$(EXTRA:.c=.o)
-CFLAGS=-Wall -lm -l$(ACTOR_LIB) -L$(ACTOR_DIR) -I$(ACTOR_DIR)
+CFLAGS= -g -lm -l$(ACTOR_LIB) -L$(ACTOR_DIR) -I$(ACTOR_DIR)
 
 all: $(TARGET)
 
