@@ -3,7 +3,7 @@
 Role frog_role = {frog_initialisation, frog_script, sizeof(Frog)};
 
 int choose_disease(Actor* actor){
-	return actor->id < 10;
+	return (actor->id < cell_count+initial_diseased_frog_count);
 }
 
 void frog_initialisation(Actor* actor, void *prop){
@@ -14,9 +14,8 @@ void frog_initialisation(Actor* actor, void *prop){
   f_props->diseased=choose_disease(actor);
 	initialise_array(f_props->population_history, 300, 0);
 	initialise_array(f_props->infection_history, 300, 0);
-
-  f_props->state = -1-(actor->id);
-  initialiseRNG(&(f_props->state));
+	f_props->state = -1-(actor->id);
+ 	initialiseRNG(&(f_props->state));
 	if(prop == NULL)
 	{
 		actor->act_number = OFF_STAGE;
@@ -46,15 +45,12 @@ void frog_script(Actor* actor){
   }	else if(actor->act_number == ON_STAGE) {
   	frogHop(f_props->x, f_props->y, &(f_props->x), &(f_props->y), &(f_props->state));
   	f_props->hop_count++;
-		f_props->current_cell = getCellFromPosition(f_props->x, f_props->y)%initial_cell_count;
-		if(f_props->current_cell < 0)
-		{
-			printf("Frog(%d): Cell less than 0\n\tstate=%ld\n\tpos=(%f,%f)\n", actor->id, f_props->state, f_props->x,f_props->y);
-		}
+		f_props->current_cell = getCellFromPosition(f_props->x, f_props->y)%cell_count;
 		interact(actor,f_props->current_cell+1,A_FROG_HOPS_INTO_THE_UNKNOWN, 1, MPI_INT, &(f_props->diseased));
 		actor->act_number = OFF_STAGE;
 	} else if(actor->act_number ==  A_FROG_SURVEYS_THE_LAND){
 		cell_stats = (int*) actor->sent_props;
+
   	f_props->population_history[f_props->hop_count%300] += cell_stats[0];
   	f_props->infection_history[f_props->hop_count%500] += cell_stats[1];
 		if(f_props->hop_count % 300 == 0){	
@@ -64,13 +60,12 @@ void frog_script(Actor* actor){
 	  	average_cell_population/=300;
 			if(willGiveBirth(average_cell_population, &(f_props->state))){
 				talk(actor,0, A_FROG_SPAWNS);
-				Actor* baby_frog;
 				pos[0] = f_props->x;
 				pos[1] = f_props->y;
 				if(actor->mentor != NULL){
-					baby_frog = actor_train_protege(actor->mentor, frog_role, pos);
+					actor_train_protege(actor->mentor, frog_role, pos);
 				} else {
-					baby_frog = actor_train_protege(actor, frog_role, pos);
+					actor_train_protege(actor, frog_role, pos);
 				}
 			}
 		}
@@ -81,7 +76,6 @@ void frog_script(Actor* actor){
 		  average_cell_infection/=500;
 	
 			if(willCatchDisease(average_cell_infection, &(f_props->state))){
-				printf("am sick\n");
 				talk(actor,0, A_FROG_CONTRACTS_THE_PLAGUE);
 				talk(actor,f_props->current_cell+1, A_FROG_CONTRACTS_THE_PLAGUE);
 				f_props->diseased=1; 

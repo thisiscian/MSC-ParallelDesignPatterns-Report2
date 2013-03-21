@@ -2,6 +2,7 @@
 
 extern int max_time;
 extern double year_length;
+extern int initial_diseased_frog_count;
 
 Role timer_role = {timer_initialisation, timer_script, sizeof(Timer)};
 // Function which initialises the Timing actor
@@ -9,7 +10,7 @@ void timer_initialisation(Actor* actor)
 {
   Timer *t_props = actor->props;
   t_props->frog_count = initial_frog_count;
-  t_props->diseased_frog_count = 9;
+  t_props->diseased_frog_count = initial_diseased_frog_count;
   t_props->year_length = year_length/number_of_processes;
 	t_props->current_year = 0;
 
@@ -74,7 +75,7 @@ void timer_script(Actor* actor)
 				t_props->frog_count,
 				t_props->diseased_frog_count
 			);
-			for(i=1;i<=initial_cell_count;i++)
+			for(i=1;i<=cell_count;i++)
 			{
 				talk(actor, i, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
 			}

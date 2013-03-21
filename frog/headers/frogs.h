@@ -8,6 +8,7 @@
 
 int initial_frog_count;
 int max_frog_count;
+int initial_diseased_frog_count;
 extern Role frog_role;
 
 typedef struct {

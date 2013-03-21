@@ -6,30 +6,26 @@
 #include "../header/am_interact.h"
 #include "../header/am_misc.h"
 #include "../header/am_proteges.h"
+#include <string.h>
 
 // Allows actors to send messages and data to each other via MPI
 // - storage is a char* type pointer because chars are 1 byte, which makes it easy to send flexible messages
 void interact(Actor *actor, int interact_id, int message, int message_size, MPI_Datatype datatype, void *prop){
-	int size = 3*sizeof(int)+message_size*sizeof(datatype)+sizeof(MPI_Datatype);
+	int size = 3*sizeof(int)+message_size*sizeof(datatype);
 	int destination_rank = interact_id%number_of_processes;
 
-	char* storage = malloc(size);
-	char* props = (char*) prop;
-
-	*(storage+0*sizeof(int)) = actor->id;
-	*(storage+1*sizeof(int)) = message;
-	*(storage+2*sizeof(int)) = message_size;
-	if(message_size > 100 || interact_id < 0)
-	{
-		printf("Actor(%d): message is crazy:\n\tmessage_size=%d\n\tmessage=%d\n\tinteract_id=%d\n", actor->id, message_size, message, interact_id);
-		actor->poison_pill=1;
-		return;
-	}
+	void* storage = malloc(size);
+	memset(storage, 0, size);
+	int *info = (int *) storage;
+	info[0] = actor->id;
+	info[1] = message;
+	info[2] = message_size;	
 	if(message_size != 0 && prop != NULL){
-		*(storage+3*sizeof(int)+sizeof(MPI_Datatype)) = *props;
+		memcpy(info+3, prop, message_size*sizeof(datatype));
 	}
 
 	MPI_Bsend(storage, size, MPI_BYTE, destination_rank, interact_id, MPI_COMM_WORLD);
+	free(storage);
 	return;
 }
 
@@ -65,21 +61,27 @@ void talk_with_all_proteges(Actor *actor, int message){
 void _be_interacted_with(Actor *actor)
 {
 	int flag, size;
-	char *storage;
+	int *info;
+	void *storage;
   MPI_Status status;
 	MPI_Iprobe(MPI_ANY_SOURCE, actor->id, MPI_COMM_WORLD, &flag, &status);
-	MPI_Get_count(&status, MPI_BYTE, &size);
   if(flag){ 
+		MPI_Get_count(&status, MPI_BYTE, &size);
 		storage = malloc(size);
     MPI_Recv(storage, size, MPI_BYTE, MPI_ANY_SOURCE, actor->id, MPI_COMM_WORLD, &status);
-		actor->sender = *storage;
-		actor->act_number = *(storage+1*sizeof(int));
-		actor->last_message_size = *(storage+2*sizeof(int));
-		if(actor->last_message_size == 0){
+		info = (int *) storage;
+		actor->sender = info[0];
+		actor->act_number = info[1];
+		actor->last_message_size = info[2];
+		if(actor->act_number == 0){
 			actor->sent_props = NULL;
 		}
 		else{
-			actor->sent_props = (char*) (storage + 3*sizeof(int)+sizeof(MPI_Datatype));
+			actor->sent_props = info+3;
+		}
+		if(actor->act_number == -1)
+		{
+			actor->poison_pill = 1;
 		}
 	}
 	return;

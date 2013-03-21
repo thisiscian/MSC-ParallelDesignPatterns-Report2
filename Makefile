@@ -1,4 +1,4 @@
-NPROC=3
+NPROC=8
 LIBRARY_DIR=actormetaphor
 FROG_DIR=frog
 FROG_RUN=frog_exec
@@ -7,16 +7,15 @@ mpicc:
 	cd $(LIBRARY_DIR) && make mpicc
 	cd $(FROG_DIR) && make mpicc
 
-vampir:
-	cd $(LIBRARY_DIR) && make vampir
-	cd $(FROG_DIR) && make vampir
-
 gcc:
 	cd $(LIBRARY_DIR) && make gcc
 	cd $(FROG_DIR) && make gcc
 
-run: 
-	mpiexec -n $(NPROC) $(FROG_DIR)/$(FROG_RUN)
+local-%: 
+	mpiexec -n $(patsubst local-%,%,$@) $(FROG_DIR)/$(FROG_RUN)
+
+submit-%:
+	./qsubmit $(patsubst submit-%,%,$@)
 
 clean:
 	@echo "Cleaning all directories..."

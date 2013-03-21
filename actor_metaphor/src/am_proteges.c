@@ -36,6 +36,7 @@ void _retire_protege(Actor *actor, Protege *protege){
 				printf("Given protege is not a member of this list!");
 				return;
 			}
+			proteges = proteges->next;
 		}
 		proteges->next = protege->next;
 		return;
@@ -47,14 +48,19 @@ void _retire_protege(Actor *actor, Protege *protege){
 
 int _help_proteges(Actor *actor) {
   int protege_count = 0;
+	int test = 0;
 	Protege *protege = actor->proteges;
+	Protege *tmp;
   while(protege != NULL && !actor->poison_pill){
-    if(perform(protege->actor)){
+		test = perform(protege->actor);	
+    if(test){
       protege_count++;
       protege = protege->next;
     }
     else{
+			tmp = protege->next;
       _retire_protege(actor, protege);
+			protege = tmp;
     }
   }
   return protege_count;

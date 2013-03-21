@@ -31,14 +31,10 @@ void land_cell_script(Actor* actor)
 	else if(actor->act_number == A_FROG_HOPS_INTO_THE_UNKNOWN)
   {
     int my_data[2] = {lc_props->population_influx, lc_props->infection_level};
-    int* frog_data = actor->sent_props;
-		if(actor->sender < 0)
-		{
-			printf("actor->sender is nuts here! %d\n", actor->sender);
-		}
+    int frog_data = *((int *)actor->sent_props);
 		interact(actor, actor->sender, A_FROG_SURVEYS_THE_LAND, 2, MPI_INT, my_data);
     lc_props->population_influx++;
-    lc_props->infection_level += *frog_data;
+    lc_props->infection_level += frog_data;
 		actor->act_number = OFF_STAGE;
   }
 }

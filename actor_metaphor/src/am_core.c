@@ -56,6 +56,7 @@ Actor *_train_actor (Actor *new_mentor, int new_id, Role role, void *props) {
 		actor->script = role.script;
   	actor->rehearse = role.rehearse;
   	actor->props = (void*) malloc(role.memory_required);
+		memset(actor->props, 0, role.memory_required);
   	actor->rehearse(actor, props);
 	}
 	else{

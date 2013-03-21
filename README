@@ -1,2 +1,17 @@
-ActorMetaphor
-----------
+
+
+-----------------
+ actor_metaphor
+-----------------
+
+This is an implementation of the actor model in C using MPI.
+More information can be found in the README file in the 'actor_metaphor/' folder.
+
+
+------
+ frog
+------
+
+This is a simulation of frogs with blue-nosed disease.
+It is implemented using the actor_metaphor library.
+More information can be found in the README file in the 'frog/' folder.

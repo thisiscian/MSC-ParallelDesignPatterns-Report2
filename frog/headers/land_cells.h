@@ -4,7 +4,7 @@
 #include <actor_metaphor.h>
 #include "extra_functions.h"
 
-int initial_cell_count;
+int cell_count;
 extern Role land_cell_role;
 
 typedef struct {

@@ -8,6 +8,7 @@
 #include "frogs.h"
 #include "land_cells.h"
 #include "timers.h"
+#include "string.h"
 
 long state;
 
@@ -30,5 +31,7 @@ enum {
 Role choose_role(int id);
 int min(int a, int b);
 void initialise_array(int *arr, int size, int val);
+int collect_input(int argc, char *argv[]);
+void help(char *program_name);
 
 #endif

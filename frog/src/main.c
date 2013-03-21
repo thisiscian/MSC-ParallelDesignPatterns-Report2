@@ -6,41 +6,18 @@
 
 int main(int argc, char* argv[])
 {
-  // Define a lead_actor, the first actor on an mpi process
-  // Note that this is a normal actor type, it is no different to any
-  // other actor.
   Actor *lead_actor;
   Actor *test_actor;
 
-	if(argc == 7)
-	{
-		initial_frog_count = atoi(argv[1]);
-		initial_cell_count = atoi(argv[2]);
- 		max_frog_count = atoi(argv[3]);
-  	max_time = atoi(argv[4]);
-		year_length = atoi(argv[5]);
-		buff_size = 10000*sizeof(double);
-	}
-	else
-	{
-//  	initial_frog_count = 10;
-//  	initial_cell_count = 16;
-// 		max_frog_count = 10;
-//  	max_time = 2;
-//		year_length = 1;
-//		buff_size = 10000*sizeof(double);
-  	initial_frog_count = 34;
-  	initial_cell_count = 16;
- 		max_frog_count = 100;
-  	max_time = 100;
-		year_length = 1;
-		buff_size = 5000*sizeof(double);
+	if(collect_input(argc, argv)) {
+		printf("Exiting...\n");
+		return 1;
 	}
 
   // Define the lead_actor according to the functions that follow;
   lead_actor = actor_initialise_metaphor(choose_role);
   // Assign actors to the remaining initial roles
-	while (peek_next_id() <= initial_frog_count + initial_cell_count)
+	while (peek_next_id() <= initial_frog_count + cell_count)
 	{
     test_actor = actor_train_protege(lead_actor, choose_role(peek_next_id()), NULL);
   }

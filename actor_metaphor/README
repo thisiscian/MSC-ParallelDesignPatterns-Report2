@@ -1,0 +1,11 @@
+---------------------------
+  README - actor_metaphor
+---------------------------
+
+This is an implementation of the actor model using C and MPI.
+
+
+
+Running "make" will produce "libactor_metaphor.a" which can be included
+
+The actor metaphor relies on the production of actors that 
