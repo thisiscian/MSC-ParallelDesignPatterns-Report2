@@ -10,7 +10,6 @@
 // Allows actors to send messages and data to each other via MPI
 // - storage is a char* type pointer because chars are 1 byte, which makes it easy to send flexible messages
 void interact(Actor *actor, int interact_id, int message, int message_size, MPI_Datatype datatype, void *prop){
-	int info[3] = {actor->id, message, message_size};
 	int size = 3*sizeof(int)+message_size*sizeof(datatype)+sizeof(MPI_Datatype);
 	int destination_rank = interact_id%number_of_processes;
 
@@ -22,7 +21,7 @@ void interact(Actor *actor, int interact_id, int message, int message_size, MPI_
 	*(storage+2*sizeof(int)) = message_size;
 	if(message_size > 100 || interact_id < 0)
 	{
-		printf("Actor(%d): message is crazy:\n\tactor->id=%d\n\tmessage_size=%d\n\tmessage=%d\n\tinteract_id=%d\n", actor->id, message_size, message);
+		printf("Actor(%d): message is crazy:\n\tmessage_size=%d\n\tmessage=%d\n\tinteract_id=%d\n", actor->id, message_size, message, interact_id);
 		actor->poison_pill=1;
 		return;
 	}

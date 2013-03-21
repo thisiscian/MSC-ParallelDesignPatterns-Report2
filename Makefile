@@ -11,6 +11,10 @@ vampir:
 	cd $(LIBRARY_DIR) && make vampir
 	cd $(FROG_DIR) && make vampir
 
+gcc:
+	cd $(LIBRARY_DIR) && make gcc
+	cd $(FROG_DIR) && make gcc
+
 run: 
 	mpiexec -n $(NPROC) $(FROG_DIR)/$(FROG_RUN)
 

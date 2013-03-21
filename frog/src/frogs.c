@@ -6,8 +6,8 @@ int choose_disease(Actor* actor){
 	return actor->id < 10;
 }
 
-void frog_initialisation(Actor* actor){
-  int i;
+void frog_initialisation(Actor* actor, void *prop){
+  int *props;
   Frog *f_props = actor->props;
 
   f_props->hop_count=0;
@@ -17,14 +17,16 @@ void frog_initialisation(Actor* actor){
 
   f_props->state = -1-(actor->id);
   initialiseRNG(&(f_props->state));
-	
-	if(actor->mentor == NULL){
+	if(prop == NULL)
+	{
 		actor->act_number = OFF_STAGE;
   	frogHop(0, 0, &(f_props->x), &(f_props->y), &(f_props->state));
-	} else {
-		Frog *mentor_props = actor->mentor->props;
-		f_props->x = mentor_props->x;
-		f_props->y = mentor_props->y;
+	}
+	else
+	{
+		props = prop;	
+		f_props->x = props[0];
+		f_props->y = props[1];
 		actor->act_number = OPEN_CURTAINS;
 	}
 }
@@ -32,6 +34,7 @@ void frog_initialisation(Actor* actor){
 void frog_script(Actor* actor){
   Frog *f_props = actor->props;
 	int i;
+	int pos[2];
 	int *cell_stats;
 	float average_cell_population = 0;
 	float average_cell_infection = 0;
@@ -46,7 +49,7 @@ void frog_script(Actor* actor){
 		f_props->current_cell = getCellFromPosition(f_props->x, f_props->y)%initial_cell_count;
 		if(f_props->current_cell < 0)
 		{
-			printf("Frog(%d): Cell less than 0\n\tstate=%d\n\tpos=(%f,%f)\n", actor->id, f_props->state, f_props->x,f_props->y);
+			printf("Frog(%d): Cell less than 0\n\tstate=%ld\n\tpos=(%f,%f)\n", actor->id, f_props->state, f_props->x,f_props->y);
 		}
 		interact(actor,f_props->current_cell+1,A_FROG_HOPS_INTO_THE_UNKNOWN, 1, MPI_INT, &(f_props->diseased));
 		actor->act_number = OFF_STAGE;
@@ -62,10 +65,12 @@ void frog_script(Actor* actor){
 			if(willGiveBirth(average_cell_population, &(f_props->state))){
 				talk(actor,0, A_FROG_SPAWNS);
 				Actor* baby_frog;
+				pos[0] = f_props->x;
+				pos[1] = f_props->y;
 				if(actor->mentor != NULL){
-					baby_frog = actor_train_protege(actor->mentor, frog_role);
+					baby_frog = actor_train_protege(actor->mentor, frog_role, pos);
 				} else {
-					baby_frog = actor_train_protege(actor, frog_role);
+					baby_frog = actor_train_protege(actor, frog_role, pos);
 				}
 			}
 		}

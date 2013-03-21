@@ -7,9 +7,10 @@
 #include "../header/am_proteges.h"
 #include "../header/am_role.h"
 #include "../header/am_misc.h"
+#include "../header/am_interact.h"
 
-Actor* actor_train_protege (Actor *mentor, Role role){
-  Actor *actor = _train_actor(mentor, get_next_id(), role);
+Actor* actor_train_protege (Actor *mentor, Role role, void *props){
+  Actor *actor = _train_actor(mentor, get_next_id(), role, props);
   if(mentor->proteges != NULL){
     _add_new_protege(actor, mentor->proteges);
   }
@@ -43,7 +44,7 @@ int perform(Actor *actor){
   return performances;
 }
 
-Actor *_train_actor (Actor *new_mentor, int new_id, Role role) {
+Actor *_train_actor (Actor *new_mentor, int new_id, Role role, void *props) {
   Actor *actor = (Actor*) malloc(sizeof(Actor));
   actor->id = new_id;
   actor->retire = 0;
@@ -55,7 +56,7 @@ Actor *_train_actor (Actor *new_mentor, int new_id, Role role) {
 		actor->script = role.script;
   	actor->rehearse = role.rehearse;
   	actor->props = (void*) malloc(role.memory_required);
-  	actor->rehearse(actor);
+  	actor->rehearse(actor, props);
 	}
 	else{
 		actor->script = no_script;

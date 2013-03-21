@@ -20,10 +20,10 @@ Actor* actor_initialise_metaphor (Role (*choose_role)(int id)){
 	Actor *actor;
 	
   if(choose_role == NULL){
-    actor = _train_actor(NULL, id, NULL_ROLE);
+    actor = _train_actor(NULL, id, NULL_ROLE, NULL);
   }
   else{
-    actor = _train_actor(NULL, id, choose_role(id));
+    actor = _train_actor(NULL, id, choose_role(id), NULL);
   }
 	return actor;
 }

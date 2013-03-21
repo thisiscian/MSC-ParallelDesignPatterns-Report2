@@ -42,7 +42,7 @@ int main(int argc, char* argv[])
   // Assign actors to the remaining initial roles
 	while (peek_next_id() <= initial_frog_count + initial_cell_count)
 	{
-    test_actor = actor_train_protege(lead_actor, choose_role(peek_next_id()));
+    test_actor = actor_train_protege(lead_actor, choose_role(peek_next_id()), NULL);
   }
   // Have the lead_actor perform it's script, and thus all protege jobs underneath it
   perform(lead_actor); 
