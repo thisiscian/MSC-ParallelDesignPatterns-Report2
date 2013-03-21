@@ -8,23 +8,12 @@ Role timer_role = {timer_initialisation, timer_script, sizeof(Timer)};
 void timer_initialisation(Actor* actor)
 {
   Timer *t_props = actor->props;
-  get_seed(actor);
   t_props->frog_count = initial_frog_count;
-  t_props->diseased_frog_count = 0;
-  t_props->year_start= MPI_Wtime();
-  t_props->year_length = year_length;
+  t_props->diseased_frog_count = 9;
+  t_props->year_length = year_length/number_of_processes;
 	t_props->current_year = 0;
 
-	actor->act_number=OPEN_CURTAINS;
-
-	printf
-  (
-  	"TIMER: new year (%d/%d)\n\tTotal Frog Count = %d\n\tDisease Frog Count = %d\n",
-    t_props->current_year,
-    max_time,
-    t_props->frog_count,
-    t_props->diseased_frog_count
-  );
+	actor->act_number=OFF_STAGE;
 }
 
 
@@ -35,14 +24,32 @@ void timer_script(Actor* actor)
 {
   int i;
   Timer *t_props = actor->props;
-	if(actor->act_number == OPEN_CURTAINS)
+	if(actor->act_number == OFF_STAGE)
+	{
+		printf
+	  (
+	  	"TIMER: new year (%d/%d)\n\tTotal Frog Count = %d\n\tDisease Frog Count = %d\n",
+	    t_props->current_year,
+	    max_time,
+	    t_props->frog_count,
+	    t_props->diseased_frog_count
+	  );
+  	t_props->year_start= MPI_Wtime();
+		for(i=0;i<number_of_processes;i++)
+		{
+			talk(actor, i, OPEN_CURTAINS);
+		}
+		talk_with_all_proteges(actor, OPEN_CURTAINS);
+		actor->act_number = ON_STAGE;
+	}
+	else if(actor->act_number == ON_STAGE)
 	{
 		if(t_props->current_year >= max_time)
 		{
 			printf("End of simulation\n");
 			for(i=0;i<number_of_processes;i++)
 			{
-				enter_dialogue(actor, i, CLOSE_CURTAINS);
+				talk(actor, i, CLOSE_CURTAINS);
 			}
     	actor->poison_pill = 1;
 		}
@@ -51,7 +58,7 @@ void timer_script(Actor* actor)
 			printf("ERROR: frog count exceeded maximum (%d), exiting... \n", max_frog_count);
 			for(i=0;i<number_of_processes;i++)
 			{
-				enter_dialogue(actor, i, CLOSE_CURTAINS);
+				talk(actor, i, CLOSE_CURTAINS);
 			}
     	actor->poison_pill = 1;
 		}
@@ -69,29 +76,29 @@ void timer_script(Actor* actor)
 			);
 			for(i=1;i<=initial_cell_count;i++)
 			{
-				enter_dialogue(actor, i, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
+				talk(actor, i, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
 			}
 		}
 	}
 	else if(actor->act_number == A_FROG_SPAWNS)
   {
     t_props->frog_count++;
-		actor->act_number = OPEN_CURTAINS;
+		actor->act_number = ON_STAGE;
   }
   else if(actor->act_number == A_FROG_CONTRACTS_THE_PLAGUE)
   {
     t_props->diseased_frog_count++;
-		actor->act_number = OPEN_CURTAINS;
+		actor->act_number = ON_STAGE;
   }
   else if(actor->act_number == A_FROG_CROAKS)
   {
     t_props->frog_count--;
     t_props->diseased_frog_count--;
-		actor->act_number = OPEN_CURTAINS;
+		actor->act_number = ON_STAGE;
   }
   else if(actor->act_number == CLOSE_CURTAINS)
   {
-		printf("told to close curtains...\n");
+		printf("Actor (%d) received messages: close(%d)\n", actor->id, actor->sender);
     actor->poison_pill = 1;
   }
 }

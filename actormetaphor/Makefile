@@ -1,18 +1,28 @@
-CC=cc
-SOURCE=actormetaphor.c
-HEADER=actormetaphor.h
-TARGET=libactormetaphor.a
-OBJECT=$(SOURCE:.c=.o)
+VTCC=vtcc -vt:cc mpicc
+MPICC=mpicc
+SOURCE_FOLDER=src
+HEADER_FOLDER=header
+SOURCE=$(wildcard $(SOURCE_FOLDER)/*.c)
+HEADER=$(wildcard $(HEADER_FOLDER)/*.h) actor_metaphor.h
+TARGET=libactor_metaphor.a
+OBJECT=$(patsubst $(SOURCE_FOLDER)/%.c,%.o,$(SOURCE))
 CFLAGS=-g
 
-all:
-	@echo "Making actormetaphor library..."
-	@$(CC) -c $(SOURCE) $(CFLAGS)
+mpicc: $(OBJECT)
+	@echo "  ##Making actor_metaphor with mpicc##  "
+	$(MPICC) -c $(SOURCE) $(CFLAGS)
 	@ar -rs $(TARGET) $(OBJECT) $(HEADER)
+	@rm -f $(OBJECT)
+
+vampir: $(OBJECT)
+	@echo "  ##Making actor_metaphor library with vampir flags##  "
+	$(VTCC) -c $(SOURCE) $(CFLAGS)
+	@ar -rs $(TARGET) $(OBJECT) $(HEADER)
+	@rm -f $(OBJECT)
 
 clean: 
 	@echo "Cleaning actormetaphor folder..."
 	@rm -f $(TARGET) $(OBJECT)
 
-$(OBJECT): Makefile $(TARGET)
+$(OBJECT): Makefile
 

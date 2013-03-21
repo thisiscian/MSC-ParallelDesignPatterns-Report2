@@ -14,9 +14,10 @@ long state;
 // List of possible messages to send; this just makes message passing a bit
 // clearer for the user, it's not necessary
 enum {
-  CLOSE_CURTAINS=1,
+  CLOSE_CURTAINS,
 	OPEN_CURTAINS,
 	OFF_STAGE,
+	ON_STAGE,
 	A_FROG_SURVEYS_THE_LAND,
   A_MONSOON_BRINGS_IN_THE_NEW_YEAR,
   A_FROG_HOPS_INTO_THE_UNKNOWN,
@@ -26,8 +27,8 @@ enum {
   A_FROG_CROAKS
 };
 
-long* get_seed(Actor* actor);
 Role choose_role(int id);
 int min(int a, int b);
+void initialise_array(int *arr, int size, int val);
 
 #endif

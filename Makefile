@@ -1,30 +1,21 @@
-NPROC=2
+NPROC=3
 LIBRARY_DIR=actormetaphor
-TEST_DIR=test
-TEST_RUN=test_exec
 FROG_DIR=frog
 FROG_RUN=frog_exec
 
-all: library frog
+mpicc:
+	cd $(LIBRARY_DIR) && make mpicc
+	cd $(FROG_DIR) && make mpicc
 
-library:
-	cd $(LIBRARY_DIR) && make
+vampir:
+	cd $(LIBRARY_DIR) && make vampir
+	cd $(FROG_DIR) && make vampir
 
-test: library
-	cd $(TEST_DIR) && make $(TEST_RUN)
-
-run_test: test
-	mpiexec -n $(NPROC) $(TEST_DIR)/$(TEST_RUN)
-
-frog: library
-	cd $(FROG_DIR) && make $(FROG_RUN)
-
-run_frog: frog
+run: 
 	mpiexec -n $(NPROC) $(FROG_DIR)/$(FROG_RUN)
 
 clean:
 	@echo "Cleaning all directories..."
 	@cd $(LIBRARY_DIR) && make clean
 	@cd $(FROG_DIR) && make clean
-	@cd $(TEST_DIR) && make clean
 

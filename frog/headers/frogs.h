@@ -1,7 +1,7 @@
 #ifndef __FROGS_H__
 #define __FROGS_H__
 
-#include <actormetaphor.h>
+#include <actor_metaphor.h>
 #include "extra_functions.h"
 #include "../provided-functions/ran2.h"
 #include "../provided-functions/frog-functions.h"
@@ -11,6 +11,7 @@ int max_frog_count;
 extern Role frog_role;
 
 typedef struct {
+	long state;
   float x;
   float y;
   int diseased;
@@ -20,8 +21,9 @@ typedef struct {
   int infection_history[500];
 } Frog;
 
-void frog_initialisation(Actor* actor);
-void frog_script(Actor* actor);
+void frog_initialisation(Actor *actor);
+void frog_script(Actor *actor);
+int choose_disease(Actor *actor);
 
 #endif
 
