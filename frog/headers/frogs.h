@@ -13,8 +13,7 @@ extern Role frog_role;
 
 typedef struct {
 	long state;
-  float x;
-  float y;
+  float pos[2];
   int diseased;
   int hop_count;
 	int current_cell;

@@ -13,12 +13,14 @@ mkdir -p Output/Error
 
 if [[ x$2x == xCOMx ]]; then
 	make clean && make
-	time mpiexec -n $1 $output
+	args=${@:3:$#}
+	time mpiexec -n $1 $output $args
 else
 	if [[ -n $1 ]]; then
 		NPROC=$1
 	else
 		NPROC=4
 	fi
-	qsub -pe mpi $NPROC -N AM_frog $0 $NPROC COM
+	args=${@:2:$#}
+	qsub -pe mpi $NPROC -N AM_frog $0 $NPROC COM $args
 fi

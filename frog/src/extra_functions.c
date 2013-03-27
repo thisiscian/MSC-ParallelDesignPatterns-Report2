@@ -24,6 +24,16 @@ void initialise_array(int *arr, int size, int val){
 	}
 	return;
 }
+
+void calculate_average(int *arr, int size, float *out){
+	int i;
+	for(i=0; i<size;i++){
+		*out += arr[i];
+	}
+	*out = *out/size;
+	return;
+}
+
 	
 int collect_input(int argc, char *argv[]){
 	int i=1, err=0;
@@ -37,8 +47,7 @@ int collect_input(int argc, char *argv[]){
 	year_length = 1;
 	buff_size = pow(2,12)*sizeof(double);
 
-	while(i<argc && err == 0)
-	{
+	while(i<argc && err == 0){
 		if(!strcmp(argv[i], "--frog")) {
 			if(i+1 < argc){
 				initial_frog_count = atoi(argv[i+1]);
@@ -111,8 +120,7 @@ int collect_input(int argc, char *argv[]){
 	return err;
 }
 
-void help(char* program_name)
-{
+void help(char* program_name){
 	printf("Usage: %s [options] \n", program_name);
 	printf("Options:\n");
 	printf("  --help\t\tshow this help message\n");

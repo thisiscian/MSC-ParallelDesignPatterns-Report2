@@ -1,11 +1,11 @@
 NPROC=8
-LIBRARY_DIR=actormetaphor
+LIBRARY_DIR=actor_metaphor
 FROG_DIR=frog
 FROG_RUN=frog_exec
 
 mpicc:
-	cd $(LIBRARY_DIR) && make mpicc
-	cd $(FROG_DIR) && make mpicc
+	cd $(LIBRARY_DIR) && make
+	cd $(FROG_DIR) && make
 
 gcc:
 	cd $(LIBRARY_DIR) && make gcc
