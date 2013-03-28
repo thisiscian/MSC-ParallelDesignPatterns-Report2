@@ -35,6 +35,7 @@ Actor* actor_train_protege (Actor *mentor, Role role, void *props);
 int perform(Actor *actor);
 
 /*Private Functions*/
-Actor *_train_actor (Actor *mentor, int internal_id, Role role, void *props);
+Actor* _train_actor (Actor *mentor, int internal_id, Role role, void *props);
+void _retire_actor(Actor *actor);
 
 #endif

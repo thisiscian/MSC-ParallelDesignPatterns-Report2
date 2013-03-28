@@ -21,46 +21,28 @@ void _add_new_protege(Actor *actor, Protege *protege_list){
 	return;
 }
 
-void _retire_protege(Actor *actor, Protege *protege){
-	Protege *proteges = actor->proteges;
-	if(actor->proteges == protege)
-	{
-		actor->proteges = protege->next;
-	}
-	else
-	{
-		while(proteges->next != protege)
-		{
-			if(proteges->next == NULL)
-			{
-				printf("Given protege is not a member of this list!");
-				return;
-			}
-			proteges = proteges->next;
-		}
-		proteges->next = protege->next;
-		return;
-			
-	}
-  actor->proteges = actor->proteges->next;
+void _retire_protege(Protege *retiree){
+  _retire_actor(retiree->actor);
+  free(retiree);
 	return;
 }
 
 int _help_proteges(Actor *actor) {
   int protege_count = 0;
-	int test = 0;
 	Protege *protege = actor->proteges;
+	Protege *prev = NULL;
 	Protege *tmp;
   while(protege != NULL && !actor->poison_pill){
-		test = perform(protege->actor);	
-    if(test){
+    if(perform(protege->actor)){
       protege_count++;
+      prev = protege;
       protege = protege->next;
     }
     else{
-			tmp = protege->next;
-      _retire_protege(actor, protege);
-			protege = tmp;
+      tmp = protege;
+      protege = protege->next;
+      prev->next = protege;
+      _retire_protege(tmp);
     }
   }
   return protege_count;

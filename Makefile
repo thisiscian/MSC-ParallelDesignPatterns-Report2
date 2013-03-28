@@ -7,10 +7,6 @@ mpicc:
 	cd $(LIBRARY_DIR) && make
 	cd $(FROG_DIR) && make
 
-gcc:
-	cd $(LIBRARY_DIR) && make gcc
-	cd $(FROG_DIR) && make gcc
-
 local-%: 
 	mpiexec -n $(patsubst local-%,%,$@) $(FROG_DIR)/$(FROG_RUN)
 

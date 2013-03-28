@@ -60,7 +60,7 @@ void talk_with_all_proteges(Actor *actor, int message){
 // Allows actor to receive messages from an `interact` send
 void _be_interacted_with(Actor *actor)
 {
-	int flag, size;
+	int flag,size;
 	int *info;
 	void *storage;
   MPI_Status status;
@@ -73,16 +73,18 @@ void _be_interacted_with(Actor *actor)
 		actor->sender = info[0];
 		actor->act_number = info[1];
 		actor->last_message_size = info[2];
-		if(actor->act_number == 0){
+		if(info[2] == 0){
 			actor->sent_props = NULL;
-		}
-		else{
-			actor->sent_props = info+3;
+		}	else {
+      free(actor->sent_props);
+      actor->sent_props = malloc(size-3*sizeof(int));
+		  memcpy(actor->sent_props, info+3, size-3*sizeof(int));
 		}
 		if(actor->act_number == -1)
 		{
 			actor->poison_pill = 1;
 		}
+    free(storage);
 	}
 	return;
 }

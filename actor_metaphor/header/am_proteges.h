@@ -15,7 +15,7 @@ struct Protege_s{
 
 Protege* _train_protege(Actor *actor);
 void _add_new_protege(Actor *actor, Protege *protege_list);
-void _retire_protege(Actor *actor, Protege *protege);
+void _retire_protege(Protege *retiree);
 int _help_proteges(Actor *actor);
 
 #endif

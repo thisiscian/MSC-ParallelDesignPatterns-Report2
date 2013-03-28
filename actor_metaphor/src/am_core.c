@@ -52,6 +52,7 @@ Actor *_train_actor (Actor *new_mentor, int new_id, Role role, void *props) {
   actor->proteges = NULL;
 	actor->sender = -1;
 	actor->poison_pill = 0;
+  actor->sent_props = NULL;
 	if(!is_null_role(role)){
 		actor->script = role.script;
   	actor->rehearse = role.rehearse;
@@ -65,4 +66,19 @@ Actor *_train_actor (Actor *new_mentor, int new_id, Role role, void *props) {
   	actor->props = malloc(0);
 	}
   return actor;
+}
+
+void _retire_actor(Actor *actor){
+  Protege *tmp;
+  while(actor->proteges != NULL){
+    tmp = actor->proteges;
+    actor->proteges = actor->proteges->next;
+    _retire_protege(tmp);
+  }
+  free(actor->sent_props);
+  free(actor->props);
+  actor->props = NULL;
+  free(actor);
+  actor = NULL;
+  return;
 }

@@ -10,19 +10,20 @@ int next_id = 0;
 int process_rank;
 int number_of_processes;
 int buff_size=1000*sizeof(double);
+void *buf;
 
 Actor* actor_initialise_metaphor (Role (*choose_role)(int id)){
  	MPI_Init(NULL,NULL);
 	MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &number_of_processes);
-	MPI_Buffer_attach(malloc(buff_size),buff_size);
+  buf = malloc(buff_size);
+	MPI_Buffer_attach(buf,buff_size);
 	int id = get_next_id();
 	Actor *actor;
 	
   if(choose_role == NULL){
     actor = _train_actor(NULL, id, NULL_ROLE, NULL);
-  }
-  else{
+  } else {
     actor = _train_actor(NULL, id, choose_role(id), NULL);
   }
 	return actor;
@@ -40,6 +41,8 @@ void actor_finalise_metaphor(Actor *actor){
 		MPI_Recv(&var,count,MPI_INT,process_rank,MPI_ANY_TAG,MPI_COMM_WORLD, &status);
 		MPI_Iprobe(process_rank, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	}
+  _retire_actor(actor);
+  free(buf);
   MPI_Finalize();
 }
 
