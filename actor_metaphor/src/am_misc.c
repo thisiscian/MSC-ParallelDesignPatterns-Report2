@@ -42,8 +42,9 @@ void actor_finalise_metaphor(Actor *actor){
 		MPI_Iprobe(process_rank, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	}
   _retire_actor(actor);
-  free(buf);
+	MPI_Barrier(MPI_COMM_WORLD);
   MPI_Finalize();
+  free(buf);
 }
 
 int peek_next_id(){
@@ -57,3 +58,4 @@ int get_next_id(){
 
 void no_rehearse(Actor *actor){}
 void no_script(Actor *actor){}
+void no_encore(Actor *actor){}

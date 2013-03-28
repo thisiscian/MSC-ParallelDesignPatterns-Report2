@@ -1,6 +1,6 @@
 #include "../headers/frogs.h"
 
-Role frog_role = {frog_initialisation, frog_script, sizeof(Frog)};
+Role frog_role = {frog_initialisation, frog_script, frog_encore, sizeof(Frog)};
 
 int choose_disease(Actor* actor){
 	return (actor->id <= cell_count+initial_diseased_frog_count);
@@ -82,3 +82,5 @@ void frog_script(Actor* actor){
 			break;
 	}
 }
+
+void frog_encore(Actor *actor){}

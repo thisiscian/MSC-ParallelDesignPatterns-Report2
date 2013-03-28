@@ -1,6 +1,6 @@
 #include "../headers/land_cells.h"
 
-Role land_cell_role = {land_cell_initialisation, land_cell_script, sizeof(Land_Cell)};
+Role land_cell_role = {land_cell_initialisation, land_cell_script, land_cell_encore, sizeof(Land_Cell)};
 
 void land_cell_initialisation(Actor* actor){
   Land_Cell *lc_props = actor->props;
@@ -146,3 +146,5 @@ int find_least_loaded_process(Load_List *load_list){
 	}
 	return min_on_proc[min][0];	
 }
+
+void land_cell_encore(Actor *actor);

@@ -11,8 +11,9 @@
 extern Role NULL_ROLE;
 
 struct Role_s {
-  void (*rehearse)();
+  void (*rehearse)(Actor* actor);
   void (*script)(Actor *actor);
+  void (*encore)(Actor *actor);
   int memory_required;
 };
 
