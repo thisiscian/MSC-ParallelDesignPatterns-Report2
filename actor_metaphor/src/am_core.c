@@ -56,6 +56,7 @@ Actor *_train_actor (Actor *new_mentor, int new_id, Role role, void *props) {
 	if(!is_null_role(role)){
 		actor->script = role.script;
   	actor->rehearse = role.rehearse;
+		actor->encore = role.encore;
   	actor->props = (void*) malloc(role.memory_required);
 		memset(actor->props, 0, role.memory_required);
   	actor->rehearse(actor, props);
@@ -63,6 +64,7 @@ Actor *_train_actor (Actor *new_mentor, int new_id, Role role, void *props) {
 	else{
 		actor->script = no_script;
 		actor->rehearse = no_rehearse;
+		actor->encore = no_encore;
   	actor->props = malloc(0);
 	}
   return actor;
@@ -75,6 +77,7 @@ void _retire_actor(Actor *actor){
     actor->proteges = actor->proteges->next;
     _retire_protege(tmp);
   }
+	actor->encore(actor);
   free(actor->sent_props);
   free(actor->props);
   actor->props = NULL;
