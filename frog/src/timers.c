@@ -4,7 +4,7 @@ extern int max_time;
 extern double year_length;
 extern int initial_diseased_frog_count;
 
-Role timer_role = {timer_initialisation, timer_script, sizeof(Timer)};
+Role timer_role = {timer_initialisation, timer_script, no_encore, sizeof(Timer)};
 
 // Function which initialises the timing actor
 void timer_initialisation(Actor* actor){
@@ -73,3 +73,4 @@ void timer_script(Actor* actor){
 			break;
 	}
 }
+

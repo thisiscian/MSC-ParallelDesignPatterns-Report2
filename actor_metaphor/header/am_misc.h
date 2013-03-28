@@ -23,6 +23,7 @@ int peek_next_id();
 int get_next_id();
 void no_script(Actor *actor);
 void no_rehearse(Actor *actor);
+void no_encore(Actor *actor);
 
 #endif
 

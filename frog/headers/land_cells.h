@@ -24,6 +24,8 @@ typedef struct {
 
 void land_cell_initialisation(Actor *actor);
 void land_cell_script(Actor *actor);
+void land_cell_encore(Actor *actor);
+
 void generate_load_list(Actor *actor);
 void set_land_cell_load(Actor *actor, int id, int load);
 void step_load(Actor *actor, int mod);

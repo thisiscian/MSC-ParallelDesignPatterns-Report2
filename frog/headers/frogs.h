@@ -23,7 +23,6 @@ typedef struct {
 
 void frog_initialisation(Actor *actor, void *prop);
 void frog_script(Actor *actor);
-void frog_encore(Actor *actor){}
 int choose_disease(Actor *actor);
 
 #endif

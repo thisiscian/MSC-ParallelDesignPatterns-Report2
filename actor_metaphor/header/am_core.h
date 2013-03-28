@@ -26,6 +26,7 @@ struct Actor_s{
   void *props;
   void (*rehearse)();
   void (*script)(); 
+  void (*encore)();
   Actor *mentor;
   Protege *proteges;
 };

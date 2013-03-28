@@ -147,4 +147,14 @@ int find_least_loaded_process(Load_List *load_list){
 	return min_on_proc[min][0];	
 }
 
-void land_cell_encore(Actor *actor);
+void land_cell_encore(Actor *actor){
+  Land_Cell *lc_props = actor->props;
+  Load_List *tmp;
+  Load_List *list = lc_props->load_list;
+  while(list != NULL){
+    tmp = list;
+    list = list->next;
+    free(tmp);
+  }
+  return;
+}
