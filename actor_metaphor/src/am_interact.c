@@ -76,12 +76,11 @@ void _be_interacted_with(Actor *actor)
 		if(info[2] == 0){
 			actor->sent_props = NULL;
 		}	else {
-      free(actor->sent_props);
+			free(actor->sent_props);
       actor->sent_props = malloc(size-3*sizeof(int));
 		  memcpy(actor->sent_props, info+3, size-3*sizeof(int));
 		}
-		if(actor->act_number == -1)
-		{
+		if(actor->act_number == -1) {
 			actor->poison_pill = 1;
 		}
     free(storage);

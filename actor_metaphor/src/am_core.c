@@ -80,7 +80,6 @@ void _retire_actor(Actor *actor){
 	actor->encore(actor);
   free(actor->sent_props);
   free(actor->props);
-  actor->props = NULL;
   free(actor);
   actor = NULL;
   return;
