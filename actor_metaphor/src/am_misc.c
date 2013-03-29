@@ -12,13 +12,14 @@ int number_of_processes;
 int buff_size=1000*sizeof(double);
 void *buf;
 
+// Initialise the metaphor
 Actor* actor_initialise_metaphor (Role (*choose_role)(int id)){
  	MPI_Init(NULL,NULL);
 	MPI_Comm_rank(MPI_COMM_WORLD, &process_rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &number_of_processes);
   buf = malloc(buff_size);
 	MPI_Buffer_attach(buf,buff_size);
-	int id = get_next_id();
+	int id = get_next_id(); //gets a unique id
 	Actor *actor;
 	
   if(choose_role == NULL){
@@ -29,7 +30,7 @@ Actor* actor_initialise_metaphor (Role (*choose_role)(int id)){
 	return actor;
 }
 
-// Receive any leftover messages and then finalise MPI
+// Receive any leftover messages, free actors and then finalise MPI
 void actor_finalise_metaphor(Actor *actor){
 	int flag;
 	int count;
@@ -47,15 +48,18 @@ void actor_finalise_metaphor(Actor *actor){
   free(buf);
 }
 
+// preview the next unique id
 int peek_next_id(){
 	return process_rank+next_id*number_of_processes; 
 }
 
+// gets the next unique id
 int get_next_id(){
   next_id++;
 	return process_rank+(next_id-1)*number_of_processes; 
 }
 
+// empty role elements
 void no_rehearse(Actor *actor){}
 void no_script(Actor *actor){}
 void no_encore(Actor *actor){}

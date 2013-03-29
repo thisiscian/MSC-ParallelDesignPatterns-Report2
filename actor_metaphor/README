@@ -2,10 +2,112 @@
   README - actor_metaphor
 ---------------------------
 
+For useage, see the README in the top directory.
+
 This is an implementation of the actor model using C and MPI.
+actor_metaphor is a library that implements multiple actors on a processor.
+Use has been simplified as much as is feasible whilst maintaining generality.
+Below is a minimal example of an actor_metaphor program.
 
+%%
+%%  ##
+%%  ## Should have each processor return x=9 twice
+%%  ##
+%%
+%%  #include<actor_metaphor.h>
+%%
+%%  ## stores the variables for Example_Type actors
+%%  typedef struct {
+%%    int x;
+%%    int *y;
+%%  } Example_Type; 
+%%
+%%  ## Defines initialisation for actors
+%%  void rehearse(Actor *actor, void *props){
+%%    Example_Type *example = actor->props;
+%%    if(props == NULL){
+%%      example->x = 5;
+%%    } else {
+%%      example->x = (int*) props;
+%%    }
+%%    if(flag == 0)
+%%    example->y = malloc(10*sizeof(int));
+%%  }
+%%
+%%
+%%  ## Defines the jobs that an actor runs
+%%  void script(Actor *actor){
+%%    Example_Type *example = actor->props;
+%%    if(example->x < 10) {
+%%      example->x++;
+%%    } else {
+%%      actor->retire = 1;
+%%    }
+%%  }
+%%    
+%%  ## Defines the finalisation of an actor
+%%  void encore(Actor *actor){ 
+%%    Example_Type *example = actor->props;
+%%    free(example->y);
+%%    printf("x = %d\n", example->x);
+%%  }
+%%
+%%  ## Groups the above into one easy to use struct
+%%  Role example_role = {rehearse,script,encore, sizeof(Example_Type)}
+%%
+%%
+%%  ## Required to define a role for the main actor on each processor
+%%  Role choose_role(int id){
+%%    return example_role;
+%%  }
+%%
+%%  int main(){
+%%    ## initialises model
+%%    Actor *lead = actor_initialise_metaphor(choose_role);
+%% 
+%%    ## train a new protege with a new flag
+%%    int protege_flag = 0;
+%%    actor_train_protege(actor, example_role, &protege_flag);
+%%
+%%    ## starts the main actor performing job
+%%    ##  will also make proteges run their jobs
+%%    perform(actor);    
+%%
+%%    ## finalises model
+%%    actor_finalise_metaphor(lead);
+%%
+%%    return 0;  
+%%  }
+%%
 
+Basic messaging is achieved with
 
-Running "make" will produce "libactor_metaphor.a" which can be included
+  void talk(Actor *actor, int interact_id, int message);
 
-The actor metaphor relies on the production of actors that 
+where actor is the actor sending the message, interact_id is the actor to receive the message.
+Actors can also send message with data using
+
+  void interact(Actor *actor, int interact_id, int message, int message_size, MPI_Datatype datatype, void *prop);
+
+where prop points to the data they intend to send, and message_size is the count of the data, and datatype is the type of data.
+MPI_BYTE can be used to send structs or other irregular arrangements of data, and message_size should now be collected using sizeof().
+
+Receiving messages is done automatically, and the last message received is stored in an actor's act_number variable.
+The size of the last message sent is stored in last_message_size, and the id of the actor who sent the message is stored in sender.
+The data itself is pointed to using sent_props.
+Thus, an example of a collection of data could be
+
+%%
+%%  void print_data(Actor *actor){
+%%    A_Struct *actor_props = actor->props;
+%%    int *data = actor->sent_props;
+%%    int i;
+%%
+%%    if(actor->act_number == 0) {
+%%      for(i=0; i<actor->last_message_size; i++) {
+%%        printf("Actor(%d) sent data[%d] = %d\n", actor->sender, i, data[i]);
+%%      }
+%%    }
+%%  }
+%%
+

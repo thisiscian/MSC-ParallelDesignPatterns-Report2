@@ -1,17 +1,64 @@
 
-
 -----------------
  actor_metaphor
 -----------------
 
-This is an implementation of the actor model in C using MPI.
-More information can be found in the README file in the 'actor_metaphor/' folder.
+This is an library implementation of the actor model in C using MPI.
+The module MPICH-2 is required to be loaded.
+The library is compiled with mpicc, based on the portland group's C compiler, pgcc.
+The library can be compiled with 
+  
+  make library
 
+and can included in a C program with
+
+  #include <actor_metaphor.h>
+
+so long as the the library is linked at compilation time using
+  
+  -l actor_metaphor -L path_to_actor_library/ -I path_to_actor-library/
+
+as seen in 'frog/Makefile'.
+
+More information can be found in the README file in the 'actor_metaphor/' folder.
 
 ------
  frog
 ------
 
 This is a simulation of frogs with blue-nosed disease.
+Use MPICH-2 and mpicc based on pgcc.
 It is implemented using the actor_metaphor library.
-More information can be found in the README file in the 'frog/' folder.
+
+Compile with
+
+  make frog
+
+and run with
+
+  make run
+
+More information, including command line arguments, can be found in the README file in the 'frog/' folder, or by running
+
+  ./frog/frog_exec --help 
+
+--------------------------------
+ Running on Multiple Processors 
+--------------------------------
+
+Locally, this can be done with 
+
+  make local-N
+
+where N is the number of processors required.
+Submission to Morar can also be achieved using
+
+  make submit-N
+
+which will submit the job with N request processors.
+For greater flexibility, use
+
+  ./qsubmit N ARGS
+
+where N is the number of processors, and ARGS are arguments that the frog implementation can take.
+These are documented in the README file in the 'frog/' folder.

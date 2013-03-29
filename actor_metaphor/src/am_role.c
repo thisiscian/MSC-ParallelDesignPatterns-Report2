@@ -7,6 +7,7 @@
 
 Role NULL_ROLE = {NULL,NULL,NULL,0};
 
+// checks to see if role is the null role
 int is_null_role(Role role)
 {
 	int boole = role.script == NULL_ROLE.script;
