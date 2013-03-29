@@ -29,7 +29,9 @@ void land_cell_script(Actor* actor){
 			break;
     // print data on new year
 		case A_MONSOON_BRINGS_IN_THE_NEW_YEAR:
-      printf("%d\t%d\t%d\n", actor->id, lc_props->population_influx, lc_props->infection_level);
+	    my_data[0] = lc_props->population_influx;
+			my_data[1] = lc_props->infection_level;
+			interact(actor, actor->sender, A_LAND_CELL_REMEMBERS_THE_PAST_YEAR, 2, MPI_INT, my_data);
     	lc_props->population_influx = 0;
     	lc_props->infection_level = 0;
 			actor->act_number = OFF_STAGE;

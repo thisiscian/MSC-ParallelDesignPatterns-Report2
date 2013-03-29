@@ -15,9 +15,12 @@ typedef struct {
   double year_start;
   double year_length;
   int current_year;
+	int *cell_stats;
+	int waiting;
 } Timer;
 
-void timer_initialisation(Actor* actor);
-void timer_script(Actor* actor);
+void timer_initialisation(Actor *actor);
+void timer_script(Actor *actor);
+void timer_encore(Actor *actor);
 
 #endif

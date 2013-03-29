@@ -12,7 +12,8 @@ mkdir -p Output/Error
 
 
 if [[ x$2x == xCOMx ]]; then
-	make clean && make
+	make -s clean 
+	make -s
 	args=${@:3:$#}	
 	time mpiexec -n $1 $output $args
 else

@@ -23,7 +23,6 @@ submit-%:
 	./qsubmit $(patsubst submit-%,%,$@)
 
 clean:
-	@echo "Cleaning all directories..."
 	@cd $(LIBRARY_DIR) && make clean
 	@cd $(FROG_DIR) && make clean
 

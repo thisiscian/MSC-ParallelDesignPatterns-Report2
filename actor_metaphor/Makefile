@@ -8,11 +8,9 @@ OBJECT=$(SOURCE:.c=.o)
 CFLAGS=
 
 mpicc: $(OBJECT)
-	@echo -e '\e[1mMaking actor_metaphor library\e[0m'
 	@ar -rs $(TARGET) $(OBJECT) $(HEADER)
 
 clean: 
-	@echo -e '\e[1mCleaning actormetaphor folder...\e[0m'
 	@rm -f $(TARGET) $(OBJECT)
 
 $(OBJECT): Makefile
