@@ -18,5 +18,6 @@ The frog model frog_exec has several command line arguments that can be used to 
   --help
     shows the help message
 
-currently the program crashes if you submit it with more than 8 jobs, for reasons unknown.
-The limit should be 15, at which point load balancing fails.
+Currently the frog_metaphor only balances load across processors with a land cell on them.
+This means that the number of useful processors is limited to the number of land cells.
+This is compounded by the fact that the system currently has no method of assigning actors to unused processors.
