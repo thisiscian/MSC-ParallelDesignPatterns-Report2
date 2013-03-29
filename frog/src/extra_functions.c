@@ -95,6 +95,7 @@ int collect_input(int argc, char *argv[]){
 			}
 		} else if(!strcmp(argv[i], "--year-length")) {
 			if(i+1 < argc){
+        year_type = 0;
 				year_length = atof(argv[i+1]);
 				i+=2;
 			} else {
@@ -126,14 +127,17 @@ int collect_input(int argc, char *argv[]){
       }
     } else if(!strcmp(argv[i], "--hop-limit")) {
       if(i+1 < argc){
+				year_type = 1;
         hop_limit = atoi(argv[i+1]);
+				i+=2;
       } else {
         printf("Error: flag '--hop-limit' requires that a number follows it\n");
         err++;
       }
-    }else if(!strcmp(argv[i], "--help")) {
+    } else if(!strcmp(argv[i], "--help")) {
 			help(argv[0]);
 			err++;
+			i+=2;
 		} else {
 			printf("Error: unknown flag %s\n", argv[i]);
 			err++;

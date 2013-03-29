@@ -19,6 +19,7 @@ typedef struct {
 	long state;
   int population_influx;
   int infection_level;
+  int current_year;
 	Load_List *load_list;
 } Land_Cell;
 

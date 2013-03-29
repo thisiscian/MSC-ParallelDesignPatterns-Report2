@@ -6,6 +6,7 @@ void land_cell_initialisation(Actor* actor, void *props){
   Land_Cell *lc_props = actor->props;
   lc_props->population_influx=0;
   lc_props->infection_level=0;
+	lc_props->current_year = 0;
 	actor->act_number=OFF_STAGE;
   // create linked list of each land cell
 	generate_load_list(actor);
@@ -13,7 +14,7 @@ void land_cell_initialisation(Actor* actor, void *props){
 
 void land_cell_script(Actor* actor){
 	int my_data[2];
-	int *data;
+	int *sent_props;
 	int cell;
 	float *pos;
 	Land_Cell* lc_props = actor->props;
@@ -21,26 +22,41 @@ void land_cell_script(Actor* actor){
     // start when timer says to start
 		case OPEN_CURTAINS:
 			talk_with_all_proteges(actor, OPEN_CURTAINS);
-			actor->act_number = ON_STAGE;
+			actor->act_number = OFF_STAGE;
 			break;
     // stop when told
 		case A_MONSOON_BRINGS_IN_THE_NEW_YEAR:
-      talk_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
-	    my_data[0] = lc_props->population_influx;
-			my_data[1] = lc_props->infection_level;
-			interact(actor, actor->sender, A_LAND_CELL_REMEMBERS_THE_PAST_YEAR, 2, MPI_INT, my_data);
-    	lc_props->population_influx = 0;
-    	lc_props->infection_level = 0;
+			if(year_type == 1){
+	  		sent_props = (int*) actor->sent_props;
+				//ensures that only receive one monsoon per year
+				if(sent_props != NULL && *sent_props == lc_props->current_year){
+			    my_data[0] = lc_props->population_influx;
+					my_data[1] = lc_props->infection_level;
+					interact(actor, 0, A_LAND_CELL_REMEMBERS_THE_PAST_YEAR, 2, MPI_INT, my_data);
+	   		  interact_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR, 1, MPI_INT, sent_props);
+					lc_props->current_year++;
+    			lc_props->population_influx = 0;
+    			lc_props->infection_level = 0;
+				}
+			} else if(year_type == 0){
+			    my_data[0] = lc_props->population_influx;
+					my_data[1] = lc_props->infection_level;
+					interact(actor, 0, A_LAND_CELL_REMEMBERS_THE_PAST_YEAR, 2, MPI_INT, my_data);
+	   		  talk_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
+					lc_props->current_year++;
+    			lc_props->population_influx = 0;
+    			lc_props->infection_level = 0;
+			}
 			actor->act_number = OFF_STAGE;
 			break;
     // give frog land cell data
 		case A_FROG_HOPS_INTO_THE_UNKNOWN:
 	    my_data[0] = lc_props->population_influx;
 			my_data[1] = lc_props->infection_level;
-	  	data = (int*) actor->sent_props;
+	  	sent_props = (int*) actor->sent_props;
 			interact(actor, actor->sender, A_FROG_SURVEYS_THE_LAND, 2, MPI_INT, my_data);
 	    lc_props->population_influx++;
-	    lc_props->infection_level += *data;
+	    lc_props->infection_level += *sent_props;
 			actor->act_number = OFF_STAGE;
 			break;
     // tell frog least loaded processor
@@ -51,15 +67,14 @@ void land_cell_script(Actor* actor){
 			break;
     // updated load list
 		case A_LAND_CELL_CHANGES:
-			data = (int*) actor->sent_props;
-			set_land_cell_load(actor, actor->sender, *data);
+			sent_props = (int*) actor->sent_props;
+			set_land_cell_load(actor, actor->sender, *sent_props);
 			actor->act_number = OFF_STAGE;
 			break;
     // if asked to spawn a new frog, do so, and updated load lists
 		case A_LAND_CELL_ADOPTS_A_TADPOLE:
-			pos = (float*) actor->sent_props;
 			talk(actor,0,A_FROG_SPAWNS);
-			actor_train_protege(actor, frog_role, &(pos));
+			actor_train_protege(actor, frog_role, actor->sent_props);
 			step_load(actor, +1);
 			message_load_to_all(actor);
 			actor->act_number = OFF_STAGE;

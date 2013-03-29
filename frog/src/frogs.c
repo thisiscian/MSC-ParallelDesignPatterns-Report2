@@ -9,7 +9,8 @@ int choose_disease(Actor* actor){
 
 // initialise frogs
 void frog_initialisation(Actor* actor, void *prop){
-  int *props;
+  float *props;
+	int *year;
   Frog *f_props = actor->props;
 
   f_props->hop_count=0;
@@ -23,21 +24,26 @@ void frog_initialisation(Actor* actor, void *prop){
     // if initial frog, start from pos=0,0, and do not start working immediately
 		actor->act_number = OFF_STAGE;
   	frogHop(0, 0, &(f_props->pos[0]), &(f_props->pos[1]), &(f_props->state));
+	f_props->current_year = 0;
 	} else {
     // if new frog, start from predecessors position
-		props = (int*) prop;	
+		props = (float*) prop;	
+		year = (int *)&(props[2]);
 		f_props->pos[0] = props[0];
 		f_props->pos[1] = props[1];
+		f_props->current_year = *year;
 		actor->act_number = ON_STAGE;
 	}
 }
 
 void frog_script(Actor* actor){
   Frog *f_props = actor->props;
-	int i,*cell_stats, new_cell;
+	int i,*sent_props, new_cell;
+	void *new_frog_props;
+	float *props;
+	int *year;
 	float average_cell_population = 0;
 	float average_cell_infection = 0;
-	
 	switch(actor->act_number){
     // received start message from timer actor
 		case OPEN_CURTAINS:
@@ -50,8 +56,11 @@ void frog_script(Actor* actor){
 	  	f_props->hop_count++;
 	  	f_props->hops_this_year++;
       // if years are counted in hops, and frog is over hop limit, start monsoon
-      if(year_type == 1 && f_props->hops_this_year > hop_limit){
-        talk(actor, 0, A_FROG_HOPS_ON_THE_EVE_OF_THE_NEW_YEAR);
+      if(year_type == 1 && f_props->hops_this_year >= hop_limit){
+        for(i=0;i<number_of_processes;i++){
+					interact(actor, i, A_MONSOON_BRINGS_IN_THE_NEW_YEAR, 1, MPI_INT, &(f_props->current_year));
+				}
+				f_props->hops_this_year = 0;
       }
 			f_props->current_cell = getCellFromPosition(f_props->pos[0], f_props->pos[1])%cell_count;
       // tell land cell that you have hopped into it, and tell it your disease status
@@ -60,17 +69,16 @@ void frog_script(Actor* actor){
 			break;
     // received land cell data
 		case A_FROG_SURVEYS_THE_LAND:
-			cell_stats = (int*) actor->sent_props;
+			sent_props = (int*) actor->sent_props;
       // add data to histories
-			f_props->population_history[f_props->hop_count%300] += cell_stats[0];
-			f_props->infection_history[f_props->hop_count%500] += cell_stats[1];
+			f_props->population_history[f_props->hop_count%300] += sent_props[0];
+			f_props->infection_history[f_props->hop_count%500] += sent_props[1];
 
       // check to see if frog gets diseased
-			if(f_props->hop_count % 500 == 0 && !f_props->diseased){
+			if(!f_props->diseased){
 				calculate_average(f_props->infection_history, 500, &average_cell_infection);
 				if(willCatchDisease(average_cell_infection, &(f_props->state))){
 					talk(actor,0, A_FROG_CONTRACTS_THE_PLAGUE);
-					talk(actor,f_props->current_cell+1, A_FROG_CONTRACTS_THE_PLAGUE);
 					f_props->diseased=1; 
 				}
 			}
@@ -94,13 +102,24 @@ void frog_script(Actor* actor){
     // receive information on least loaded processor
 		case A_LAND_CELL_KNOWS_SUCH_A_PLACE:
 			new_cell = *((int*) actor->sent_props);
+			new_frog_props = malloc(2*sizeof(float)+sizeof(int));
+			props = (float*) new_frog_props;
+			year = (int*) &(props[2]);
+			props[0] = f_props->pos[0];
+			props[1] = f_props->pos[1];
+			*year = f_props->current_year;
       // tell that processor to spawn a new frog with current position
-			interact(actor, new_cell, A_LAND_CELL_ADOPTS_A_TADPOLE, 2, MPI_FLOAT, &(f_props->pos));
+			interact(actor, new_cell, A_LAND_CELL_ADOPTS_A_TADPOLE, 2*sizeof(float)+sizeof(int), MPI_BYTE, new_frog_props);
 			actor->act_number = ON_STAGE;
 			break;
+		// pass the monsoon onto proteges, reset hop counter
     case A_MONSOON_BRINGS_IN_THE_NEW_YEAR:
-      talk_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
-      f_props->hops_this_year = 0;
+			sent_props = (int*) actor->sent_props;
+			if(sent_props != NULL && f_props->current_year == *sent_props){
+	      interact_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR, 1, MPI_INT, sent_props);
+				f_props->current_year++;
+    	  f_props->hops_this_year = 0;
+			}
       actor->act_number = ON_STAGE;
       break;
 	}

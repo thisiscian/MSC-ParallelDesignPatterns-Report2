@@ -15,12 +15,13 @@ typedef struct {
   int frog_count;
   int diseased_frog_count;
   double year_start;
-  int cell_limit_reached;
+  int hop_new_year;
   double year_length;
   int year_type;
   int current_year;
 	int *cell_stats;
 	int waiting;
+	int receive_count;
 } Timer;
 
 void timer_initialisation(Actor *actor, void *props);

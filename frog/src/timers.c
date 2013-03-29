@@ -16,7 +16,9 @@ void timer_initialisation(Actor* actor, void *props){
   t_props->year_length = year_length;
 	t_props->current_year = 0;
   t_props->year_type = year_type;
+	t_props->hop_new_year = 0;
 	t_props->waiting = 0;
+	t_props->receive_count = 0;
 	t_props->cell_stats = (int*) malloc(2*cell_count*sizeof(int));
 	for(i=0; i<2*cell_count; i++){
 		t_props->cell_stats[i] = 0;
@@ -57,7 +59,7 @@ void timer_script(Actor* actor){
 			break;
     // if no messages, check to see if timings have elapsed
 		case ON_STAGE:
-			if(t_props->waiting == cell_count+1){
+			if(t_props->receive_count >= cell_count && t_props->waiting == 1){
 				for(i=0;i<cell_count;i++){
 					printf(
 						"%d\t%d\t%d\t%d\t%d\t%d\n",
@@ -71,26 +73,28 @@ void timer_script(Actor* actor){
 				}
 				printf("\n");
         t_props->year_start = MPI_Wtime();
-        t_props->cell_limit_reached = 0;
+        t_props->hop_new_year = 0;
 				t_props->waiting = 0;
-			} else if(t_props->waiting > 0) {
+				t_props->receive_count = 0;
+				if(t_props->frog_count == 0){
+					printf("#There are no more frogs left, terminating early\n");
+					actor->poison_pill=1;
+          return;
+				}
+			} else if(t_props->waiting == 1) {
 				return;
 			}
 			if(t_props->current_year >= max_time){
 				printf("#End of simulation\n");
 				actor->poison_pill = 1;
 			}	else if(is_new_year(actor)){
-				t_props->current_year++;
-				for(i=1;i<number_of_processes;i++){
-					talk(actor, i, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
-				}
-        talk_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
+				if(year_type == 0){
+					for(i=1;i<=cell_count;i++){
+						talk(actor, i, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
+					}
+					t_props->current_year++;
+				} 
 				t_props->waiting = 1;
-				if(t_props->frog_count == 0){
-					printf("#There are no more frogs left, terminating early\n");
-					actor->poison_pill=1;
-          return;
-				}
 			}
 			break;
     // increase frog count, quit if too high
@@ -115,15 +119,22 @@ void timer_script(Actor* actor){
 			break;
 		case A_LAND_CELL_REMEMBERS_THE_PAST_YEAR:
 			sent_props = (int*) actor->sent_props;
+
 			t_props->cell_stats[2*(actor->sender-1)] = sent_props[0];
 			t_props->cell_stats[2*(actor->sender-1)+1] = sent_props[1];
-			t_props->waiting++;
+			t_props->receive_count++;
 			actor->act_number = ON_STAGE;
 			break;
-    case A_FROG_HOPS_ON_THE_EVE_OF_THE_NEW_YEAR:
-      t_props->cell_limit_reached = 1;
-      actor->act_number = ON_STAGE;
-      break;
+		case A_MONSOON_BRINGS_IN_THE_NEW_YEAR:
+			sent_props = (int*) actor->sent_props;
+			if(sent_props != NULL && t_props->current_year == *sent_props){
+				t_props->hop_new_year = 1;
+    	  interact_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR, 1, MPI_INT, sent_props);
+				t_props->current_year++;
+			}
+			actor->act_number = ON_STAGE;
+			break;
+			
 	}
 }
 
@@ -143,7 +154,7 @@ int is_new_year(Actor* actor){
       }
       break;
     case 1:
-      if(t_props->cell_limit_reached){
+      if(t_props->hop_new_year){
         new_year = 1;
       }
       break;

@@ -18,6 +18,7 @@ typedef struct {
   int hop_count;
 	int current_cell;
   int hops_this_year;
+  int current_year;
   int population_history[300];
   int infection_history[500];
 } Frog;
