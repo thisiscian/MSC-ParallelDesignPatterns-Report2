@@ -5,7 +5,7 @@ SOURCE=$(wildcard $(SOURCE_FOLDER)/*.c)
 HEADER=$(wildcard $(HEADER_FOLDER)/*.h) actor_metaphor.h
 TARGET=libactor_metaphor.a
 OBJECT=$(SOURCE:.c=.o)
-CFLAGS=-g -pg
+CFLAGS=
 
 mpicc: $(OBJECT)
 	@echo -e '\e[1mMaking actor_metaphor library\e[0m'
