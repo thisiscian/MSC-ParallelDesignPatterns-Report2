@@ -1,0 +1,22 @@
+The frog model frog_exec has several command line arguments that can be used to modify it
+
+  --frog N
+    defines the total number of frogs
+  --max-frog N
+    defines the maximum number of frogs the simulation can run
+  --disease N
+    defines the number of diseased frogs
+  --cell N
+    defines the number of land cells (numbers not equal to 16 will give erratic movements)
+  --max-year N
+    defines the number of years to run the simulation for
+  --year-length F
+    defines the the length of time that each year takes (can have decimals)
+  --buffer-size F
+    defines the size of the buffer used by MPI in MB (can have decimals).
+      Use this if the program is running out of memory.
+  --help
+    shows the help message
+
+currently the program crashes if you submit it with more than 8 jobs, for reasons unknown.
+The limit should be 15, at which point load balancing fails.

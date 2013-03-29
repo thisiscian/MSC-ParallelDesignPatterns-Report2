@@ -5,6 +5,7 @@ int min(int a, int b){
   return a<=b?a:b;
 }
 
+// defines the role actors will have based on id
 Role choose_role(int id){
   if(id == 0){
     return timer_role;
@@ -17,6 +18,7 @@ Role choose_role(int id){
   }
 }
 
+// initialises an integer array
 void initialise_array(int *arr, int size, int val){
 	int i;
 	for(i=0; i<size;i++){
@@ -25,6 +27,7 @@ void initialise_array(int *arr, int size, int val){
 	return;
 }
 
+// calculates the value of an integer array
 void calculate_average(int *arr, int size, float *out){
 	int i;
 	for(i=0; i<size;i++){
@@ -34,7 +37,7 @@ void calculate_average(int *arr, int size, float *out){
 	return;
 }
 
-	
+// collect data from commandline arguments and set defaults
 int collect_input(int argc, char *argv[]){
 	int i=1, err=0;
 

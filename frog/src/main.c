@@ -8,6 +8,7 @@ int main(int argc, char* argv[]){
   Actor *lead_actor;
   Actor *test_actor;
 
+  // exit if command line arguments are incorrect
 	if(collect_input(argc, argv)) {
 		printf("Exiting...\n");
 		return 1;
