@@ -77,7 +77,7 @@ int collect_input(int argc, char *argv[]){
 			}
 		} else if(!strcmp(argv[i], "--max-frog")) {
 			if(i+1 < argc){
-				cell_count = atoi(argv[i+1]);
+				max_frog_count = atoi(argv[i+1]);
 				i+=2;
 			} else {
 				printf("Error: flag '--max-frog' requires that an integer follows it\n");

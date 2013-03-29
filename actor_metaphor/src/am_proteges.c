@@ -43,13 +43,18 @@ int _help_proteges(Actor *actor) {
       protege_count++;
       prev = protege;
       protege = protege->next;
-    }
-    else{
+    } else {
       // if protege had no work, retire and increment
       tmp = protege;
-      protege = protege->next;
-      prev->next = protege;
-      _retire_protege(tmp);
+			if(prev != NULL) {
+      	protege = protege->next;
+		    prev->next = protege;
+	      _retire_protege(tmp);
+			} else {
+				actor->proteges = actor->proteges->next;
+				protege = actor->proteges;	
+	      _retire_protege(tmp);
+			}
     }
   }
   return protege_count;
