@@ -48,6 +48,8 @@ int collect_input(int argc, char *argv[]){
  	max_frog_count = 100;
  	max_time = 100;
 	year_length = 1;
+  year_type = 0;
+  hop_limit = 1000;
 	buff_size = pow(2,12)*sizeof(double);
 
 	while(i<argc && err == 0){
@@ -107,7 +109,29 @@ int collect_input(int argc, char *argv[]){
 				printf("Error: flag '--buffer_size' requires that a number follows it\n");
 				err++;
 			}
-		} else if(!strcmp(argv[i], "--help")) {
+		} else if(!strcmp(argv[i], "--year-type")) {
+      if(i+1 < argc){
+        if(!strcmp(argv[i+1], "wtime")) {
+         year_type = 0;
+        } else if(!strcmp(argv[i+1],"hop")) {
+          year_type = 1;
+        } else {
+          printf("Error: argument to --year-type should be \"hop\" or \"wtime\"\n");
+          err++;
+        }
+        i+=2;
+      } else { 
+        printf("Error: argument to --year-type should be \"hop\" or \"wtime\"\n");
+        err++;
+      }
+    } else if(!strcmp(argv[i], "--hop-limit")) {
+      if(i+1 < argc){
+        hop_limit = atoi(argv[i+1]);
+      } else {
+        printf("Error: flag '--hop-limit' requires that a number follows it\n");
+        err++;
+      }
+    }else if(!strcmp(argv[i], "--help")) {
 			help(argv[0]);
 			err++;
 		} else {
@@ -134,7 +158,9 @@ void help(char* program_name){
 	printf("\t\t\t\tnote: some functions presume there are 16 land cells.\n");
 	printf("\t\t\t\tUsing a land cell count that is not 16 will lead to erratic frog movements.\n");
 	printf("  --max-year n\t\tthe number of years that the simulation runs for. (default 100)\n");
-	printf("  --year-length m\tdefines the length of a year in (wall clock) seconds. Can be a real number. (default 1.0) \n");
+	printf("  --year-length m\timplies --year-type wtime. Defines the length of a year in (wall clock) seconds. Can be a real number. (default 1.0) \n");
+  printf("  --hop-limit m\timplies --year-type hop. Defines the year when a popultion influx of \"m\" is reached. (default 1000) \n");
+	printf("  --year-type [wtime,hop]\tdefines the method of measuring the year. \"hop\" starts a new year when the hop limit is reached \n");
 	printf("  --buffer-size m\tdefines the MPI Buffer size in Mb. Can be a real number. (default 32.0)\n");
 	return;
 }

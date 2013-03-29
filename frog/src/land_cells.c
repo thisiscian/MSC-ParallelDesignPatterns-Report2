@@ -2,7 +2,7 @@
 
 Role land_cell_role = {land_cell_initialisation, land_cell_script, land_cell_encore, sizeof(Land_Cell)};
 
-void land_cell_initialisation(Actor* actor){
+void land_cell_initialisation(Actor* actor, void *props){
   Land_Cell *lc_props = actor->props;
   lc_props->population_influx=0;
   lc_props->infection_level=0;
@@ -24,11 +24,8 @@ void land_cell_script(Actor* actor){
 			actor->act_number = ON_STAGE;
 			break;
     // stop when told
-		case CLOSE_CURTAINS:
-    	actor->poison_pill = 1;
-			break;
-    // print data on new year
 		case A_MONSOON_BRINGS_IN_THE_NEW_YEAR:
+      talk_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
 	    my_data[0] = lc_props->population_influx;
 			my_data[1] = lc_props->infection_level;
 			interact(actor, actor->sender, A_LAND_CELL_REMEMBERS_THE_PAST_YEAR, 2, MPI_INT, my_data);

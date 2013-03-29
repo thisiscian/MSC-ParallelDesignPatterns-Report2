@@ -13,6 +13,7 @@ void frog_initialisation(Actor* actor, void *prop){
   Frog *f_props = actor->props;
 
   f_props->hop_count=0;
+  f_props->hops_this_year=0;
   f_props->diseased=choose_disease(actor);
 	initialise_array(f_props->population_history, 300, 0);
 	initialise_array(f_props->infection_history, 300, 0);
@@ -40,17 +41,18 @@ void frog_script(Actor* actor){
 	switch(actor->act_number){
     // received start message from timer actor
 		case OPEN_CURTAINS:
-			actor->act_number = ON_STAGE;
 			talk_with_all_proteges(actor, OPEN_CURTAINS);
-			break;
-    // received stop message from an actor
-		case CLOSE_CURTAINS:
-			actor->poison_pill = 1;
+			actor->act_number = ON_STAGE;
 			break;
     // first stage of normal frog work, ends when waiting for data
 		case ON_STAGE:
 	  	frogHop(f_props->pos[0], f_props->pos[1], &(f_props->pos[0]), &(f_props->pos[1]), &(f_props->state));
 	  	f_props->hop_count++;
+	  	f_props->hops_this_year++;
+      // if years are counted in hops, and frog is over hop limit, start monsoon
+      if(year_type == 1 && f_props->hops_this_year > hop_limit){
+        talk(actor, 0, A_FROG_HOPS_ON_THE_EVE_OF_THE_NEW_YEAR);
+      }
 			f_props->current_cell = getCellFromPosition(f_props->pos[0], f_props->pos[1])%cell_count;
       // tell land cell that you have hopped into it, and tell it your disease status
 			interact(actor,f_props->current_cell+1,A_FROG_HOPS_INTO_THE_UNKNOWN, 1, MPI_INT, &(f_props->diseased));
@@ -96,5 +98,10 @@ void frog_script(Actor* actor){
 			interact(actor, new_cell, A_LAND_CELL_ADOPTS_A_TADPOLE, 2, MPI_FLOAT, &(f_props->pos));
 			actor->act_number = ON_STAGE;
 			break;
+    case A_MONSOON_BRINGS_IN_THE_NEW_YEAR:
+      talk_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
+      f_props->hops_this_year = 0;
+      actor->act_number = ON_STAGE;
+      break;
 	}
 }

@@ -22,7 +22,7 @@ typedef struct {
 	Load_List *load_list;
 } Land_Cell;
 
-void land_cell_initialisation(Actor *actor);
+void land_cell_initialisation(Actor *actor, void *props);
 void land_cell_script(Actor *actor);
 void land_cell_encore(Actor *actor);
 

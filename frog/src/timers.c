@@ -7,7 +7,7 @@ extern int initial_diseased_frog_count;
 Role timer_role = {timer_initialisation, timer_script, timer_encore, sizeof(Timer)};
 
 // Function which initialises the timing actor
-void timer_initialisation(Actor* actor){
+void timer_initialisation(Actor* actor, void *props){
 	int i,j;
   Timer *t_props = actor->props;
 
@@ -15,6 +15,7 @@ void timer_initialisation(Actor* actor){
   t_props->diseased_frog_count = initial_diseased_frog_count;
   t_props->year_length = year_length;
 	t_props->current_year = 0;
+  t_props->year_type = year_type;
 	t_props->waiting = 0;
 	t_props->cell_stats = (int*) malloc(2*cell_count*sizeof(int));
 	for(i=0; i<2*cell_count; i++){
@@ -69,6 +70,8 @@ void timer_script(Actor* actor){
 					);
 				}
 				printf("\n");
+        t_props->year_start = MPI_Wtime();
+        t_props->cell_limit_reached = 0;
 				t_props->waiting = 0;
 			} else if(t_props->waiting > 0) {
 				return;
@@ -76,12 +79,12 @@ void timer_script(Actor* actor){
 			if(t_props->current_year >= max_time){
 				printf("#End of simulation\n");
 				actor->poison_pill = 1;
-			}	else if(MPI_Wtime() - t_props->year_start > t_props->year_length){
-				t_props->year_start = MPI_Wtime();
+			}	else if(is_new_year(actor)){
 				t_props->current_year++;
-				for(i=1;i<=cell_count;i++){
+				for(i=1;i<number_of_processes;i++){
 					talk(actor, i, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
 				}
+        talk_with_all_proteges(actor, A_MONSOON_BRINGS_IN_THE_NEW_YEAR);
 				t_props->waiting = 1;
 				if(t_props->frog_count == 0){
 					printf("#There are no more frogs left, terminating early\n");
@@ -117,9 +120,10 @@ void timer_script(Actor* actor){
 			t_props->waiting++;
 			actor->act_number = ON_STAGE;
 			break;
-		case CLOSE_CURTAINS:
-			actor->poison_pill = 1;
-			break;
+    case A_FROG_HOPS_ON_THE_EVE_OF_THE_NEW_YEAR:
+      t_props->cell_limit_reached = 1;
+      actor->act_number = ON_STAGE;
+      break;
 	}
 }
 
@@ -128,3 +132,23 @@ void timer_encore(Actor *actor){
 	Timer *t_props = actor->props;
 	free(t_props->cell_stats);
 }
+
+int is_new_year(Actor* actor){
+  int new_year = 0;
+	Timer *t_props = actor->props;
+  switch (t_props->year_type){
+    case 0:
+      if(MPI_Wtime() - t_props->year_start > t_props->year_length) {
+          new_year = 1;
+      }
+      break;
+    case 1:
+      if(t_props->cell_limit_reached){
+        new_year = 1;
+      }
+      break;
+  }
+  return new_year;
+}
+
+
