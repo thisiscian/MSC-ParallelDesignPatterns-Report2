@@ -76,7 +76,7 @@ void _be_interacted_with(Actor *actor)
       // if last_message_size == 0
 			actor->sent_props = NULL;
 		}	else {
-      free(actor->sent_props);
+			free(actor->sent_props);
       actor->sent_props = malloc(size-3*sizeof(int));
 		  memcpy(actor->sent_props, info+3, size-3*sizeof(int));
 		}

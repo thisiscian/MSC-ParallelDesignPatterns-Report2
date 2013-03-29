@@ -43,7 +43,6 @@ void actor_finalise_metaphor(Actor *actor){
 		MPI_Iprobe(process_rank, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
 	}
   _retire_actor(actor);
-	MPI_Barrier(MPI_COMM_WORLD);
   MPI_Finalize();
   free(buf);
 }
