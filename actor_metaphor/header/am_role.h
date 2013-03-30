@@ -10,6 +10,7 @@
 
 extern Role NULL_ROLE;
 
+// defines what an actors type is
 struct Role_s {
   void (*rehearse)(Actor* actor, void *props);
   void (*script)(Actor *actor);
@@ -17,8 +18,8 @@ struct Role_s {
   int memory_required;
 };
 
-
 /*Public Functions*/
+// checks to see if given role is null role
 int is_null_role(Role role);
 
 #endif

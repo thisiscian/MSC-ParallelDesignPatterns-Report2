@@ -10,8 +10,6 @@
 #include "timers.h"
 #include "string.h"
 
-long state;
-
 // List of possible messages to send; this just makes message passing a bit
 // clearer for the user, it's not necessary
 enum {
@@ -32,11 +30,20 @@ enum {
 	A_LAND_CELL_REMEMBERS_THE_PAST_YEAR
 };
 
+// chooses a role based on the id of an actor
 Role choose_role(int id);
+
+// standard min function for ints
 int min(int a, int b);
+
+// functions on arrays
 void initialise_array(int *arr, int size, int val);
 void calculate_average(int *arr, int size, float *out);
+
+// parse user input of commandline arguments
 int collect_input(int argc, char *argv[]);
+
+//prints help message
 void help(char *program_name);
 
 #endif

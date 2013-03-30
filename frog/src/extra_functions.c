@@ -52,6 +52,7 @@ int collect_input(int argc, char *argv[]){
   hop_limit = 1000;
 	buff_size = pow(2,12)*sizeof(double);
 
+	// this while loop roughly parses commandline arguments
 	while(i<argc && err == 0){
 		if(!strcmp(argv[i], "--frog")) {
 			if(i+1 < argc){
@@ -151,6 +152,7 @@ int collect_input(int argc, char *argv[]){
 	return err;
 }
 
+// print the help statement
 void help(char* program_name){
 	printf("Usage: %s [options] \n", program_name);
 	printf("Options:\n");

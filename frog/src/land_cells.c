@@ -61,7 +61,7 @@ void land_cell_script(Actor* actor){
 			break;
     // tell frog least loaded processor
 		case A_FROG_NEEDS_SPACE_TO_SPAWN:
-			cell = find_least_loaded_process(lc_props->load_list);
+			cell = find_least_loaded_land_cell(lc_props->load_list);
 			interact(actor,actor->sender,A_LAND_CELL_KNOWS_SUCH_A_PLACE, 1, MPI_INT, &cell);
 			actor->act_number = OFF_STAGE;
 			break;
@@ -144,7 +144,7 @@ Load_List* make_new_load_list(int id, int load){
 }
 
 // finds the least loaded processor, and then returns the least loaded cell on that processor
-int find_least_loaded_process(Load_List *load_list){
+int find_least_loaded_land_cell(Load_List *load_list){
 	int i;
 	int proc_load[number_of_processes];
 	int min_on_proc[number_of_processes][2]; //array of land cell id and corresponding process id

@@ -8,6 +8,7 @@
 
 #include "am_core.h"
 
+// Linked list of actors
 struct Protege_s{
   Actor *actor;
   struct Protege_s *next;
@@ -16,6 +17,7 @@ struct Protege_s{
 Protege* _train_protege(Actor *actor);
 void _add_new_protege(Actor *actor, Protege *protege_list);
 void _retire_protege(Protege *retiree);
+// have all proteges perform their jobs
 int _help_proteges(Actor *actor);
 
 #endif
