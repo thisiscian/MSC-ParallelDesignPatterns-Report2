@@ -65,6 +65,7 @@ Submission to Morar can also be achieved using
   make submit-N
 
 which will submit the job with N request processors.
+Results will be entered into the Output/ folder.
 For greater flexibility, use
 
   ./qsubmit N ARGS
