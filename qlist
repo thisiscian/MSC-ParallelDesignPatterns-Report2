@@ -1,0 +1,24 @@
+#!/bin/bash
+#$ -V
+#$ -l h_rt=:20:
+#$ -cwd
+#$ -o Output/
+#$ -e Output/Error/
+export VT_PFORM_LDIR=.
+
+output=frog/frog_exec
+
+mkdir -p Output/Error 
+
+
+if [[ x$1x == xCOMx ]]; then
+	make -s clean 
+	make -s
+	args=${@:3:$#}
+	for i in {1..16}; do
+		printf "$i \t" >> timing && (time mpiexec -n $i $output $args) 3>&1 1>&2 2>&3 | tee -a timing
+	done
+else
+	args=${@:2:$#}
+	qsub -pe mpi 64 -N AM_frog $0 COM $args
+fi
